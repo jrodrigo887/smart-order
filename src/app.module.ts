@@ -1,8 +1,9 @@
 import { Module } from '@nestjs/common';
+import { TypeOrmModule } from '@nestjs/typeorm';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
-import { TypeOrmModule } from '@nestjs/typeorm';
 import { EnvConfigModule } from './shared/infrastructure/env-config/env-config.module';
+import { UsersModule } from './users/infrastructure/users.module';
 
 @Module({
   imports: [
@@ -19,6 +20,7 @@ import { EnvConfigModule } from './shared/infrastructure/env-config/env-config.m
       // Use the path to your migrations
     }),
     EnvConfigModule,
+    UsersModule,
   ],
 })
 @Module({

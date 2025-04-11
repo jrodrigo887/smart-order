@@ -1,8 +1,83 @@
 {
   "files.eol": "\n",
   "files.insertFinalNewline": true,
-  "files.trimTrailingWhitespace": true
-  // "editor.formatOnSave": true,
-  // "editor.formatOnType": true,
-  // "editor.formatOnPaste": true,
+  "files.trimTrailingWhitespace": true,
+  "explorer.compactFolders": false,
+  "editor.renderWhitespace": "boundary",
+  "editor.rulers": [80, 120],
+  "javascript.updateImportsOnFileMove.enabled": "always",
+  "typescript.updateImportsOnFileMove.enabled": "always",
+  "typescript.autoClosingTags": true,
+
+  "editor.codeActionsOnSave": {
+    "source.fixAll.eslint": "explicit",
+    "source.organizeImports": "explicit"
+  },
+  "editor.defaultFormatter": "esbenp.prettier-vscode",
+  "[javascript]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
+  },
+  "[typescript]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
+  },
+  "[json]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
+  },
+
+  "editor.formatOnSave": true,
+  "editor.formatOnPaste": true,
+  "editor.formatOnType": true,
+  "editor.formatOnSaveMode": "modifications",
+  "prettier.singleQuote": true,
+  "prettier.trailingComma": "all",
+  "prettier.semi": true,
+  "prettier.arrowParens": "avoid",
+  "prettier.jsxSingleQuote": true,
+  "prettier.printWidth": 80,
+  "prettier.tabWidth": 2,
+  "material-icon-theme.folders.associations": {
+    "infra": "app",
+    "infrastructure": "app",
+    "domain": "core",
+    "products": "console",
+    "orders": "batch",
+    "customers": "contract",
+    "transaction": "custom",
+    "repository": "mappings",
+    "useCases": "components",
+    "application": "vm",
+    "features": "resource",
+    "counter": "update",
+    "entity": "class",
+    "entities": "class",
+    "value-objects": "stack",
+    "schemas": "class",
+    "stores": "ngrx-reducer",
+    "typeorm": "database",
+    "repositories": "mappings",
+    "in-memory": "less",
+    "http": "container",
+    "migrations": "tools",
+    "modules": "stack",
+    "implementations": "core",
+    "dtos": "typescript",
+    "dto": "typescript",
+    "fakes": "mock",
+    "unit": "test",
+    "e2e": "test",
+    "integration": "test",
+    "roles": "log",
+    "users": "admin",
+    "websockets": "pipe",
+    "hash-provider": "secure"
+  },
+  "material-icon-theme.files.associations": {
+    "ormconfig.json": "database",
+    "tsconfig.json": "tune",
+    "*.int-spec.ts": "test-ts",
+    "*.e2e-spec.ts": "test-ts",
+    "vitest.config.ts": "vite",
+    "vitest.config.e2e.ts": "vite",
+    "*.pdf": "pdf"
+  }
 }
