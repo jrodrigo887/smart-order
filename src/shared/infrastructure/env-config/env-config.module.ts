@@ -10,19 +10,9 @@ export class EnvConfigModule extends ConfigModule {
   static async forRoot(
     options: ConfigModuleOptions = {},
   ): Promise<DynamicModule> {
-    console.log(options);
-
     return await super.forRoot({
       envFilePath: [
-        join(
-          __dirname,
-          '..',
-          '..',
-          '..',
-          '..',
-          '.env',
-          `.${process.env.NODE_ENV}`,
-        ),
+        join(__dirname, '..', '..', '..', '..', `.env.${process.env.NODE_ENV}`),
       ],
       ...options,
     });

@@ -6,7 +6,9 @@ import { ConfigService } from '@nestjs/config';
 export class EnvConfigService implements EnvConfig {
   constructor(private readonly configService: ConfigService) {}
   getPOrt(): number {
-    const port = this.configService.get<number>('PORT');
+    const port = Number(this.configService.get<number>('PORT'));
+    console.log(port);
+
     if (!port) {
       throw new Error('PORT is not defined in the environment variables');
     }
