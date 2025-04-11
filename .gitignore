@@ -56,4 +56,6 @@ pids
 report.[0-9]*.[0-9]*.[0-9]*.[0-9]*.json
 
 #file locks
-*.lock.json
+*-lock.json
+package-lock.json
+yarn.lock
