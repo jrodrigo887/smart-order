@@ -4,11 +4,15 @@ import {
   ValidatorFieldInterface,
 } from './validator-field.interface';
 
-export class ClassValidatorField<T> implements ValidatorFieldInterface<T> {
+// eslint-disable-next-line prettier/prettier
+export abstract class ClassValidatorField<T> implements ValidatorFieldInterface<T> {
   errors: FielErrors | null = null;
   validatedData: T | null = null;
 
-  validate(value: object): boolean {
+  validate(value: Partial<T>): boolean {
+    if (!value || typeof value !== 'object') {
+      throw new Error('Invalid object for validation');
+    }
     const errorsSync = validateSync(value);
     if (errorsSync.length > 0) {
       this.errors = {};

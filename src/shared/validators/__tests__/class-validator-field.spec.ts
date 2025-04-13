@@ -38,13 +38,45 @@ describe('ClassValidatorField', () => {
   it('should validate without errors', () => {
     // Arrange
     const sut = new StubValidatorField();
-    const invalidValue = { field: ['field must not be empty'] };
+
     const validateSyncMock = jest.spyOn(classValidator, 'validateSync');
     validateSyncMock.mockReturnValue([]);
 
-    expect(sut.validate(invalidValue)).toBeTruthy();
+    expect(sut.validate({ field: 'Que coisa!' })).toBeTruthy();
     expect(validateSyncMock).toHaveBeenCalled();
-    expect(sut.validatedData).toStrictEqual(invalidValue);
+    expect(sut.validatedData).toStrictEqual({ field: 'Que coisa!' });
     expect(sut.errors).toStrictEqual({});
+  });
+
+  it('should error type constructor', () => {
+    // Arrange
+    const sut = new StubValidatorField();
+
+    const validateSyncMock = jest.spyOn(classValidator, 'validateSync');
+    validateSyncMock.mockReturnValue([]);
+
+    expect(sut.validate({ field: 'Que coisa!' })).toBeTruthy();
+    expect(validateSyncMock).toHaveBeenCalled();
+    expect(sut.validatedData).toStrictEqual({ field: 'Que coisa!' });
+    expect(sut.errors).toStrictEqual({});
+  });
+  it('[Unknown validation error]', () => {
+    // Arrange
+    const sut = new StubValidatorField();
+    const fakerError = [
+      {
+        property: 'tropa',
+        constraints: undefined,
+      },
+    ];
+    const validateSyncMock = jest.spyOn(classValidator, 'validateSync');
+    validateSyncMock.mockReturnValue(fakerError);
+
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
+    expect(sut.validate({ field: 'Que coisa!' } as any)).toBeFalsy();
+    expect(validateSyncMock).toHaveBeenCalled();
+    expect(sut.errors).toStrictEqual({
+      tropa: ['Unknown validation error'],
+    });
   });
 });
