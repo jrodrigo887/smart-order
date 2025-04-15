@@ -1,10 +1,12 @@
 import { DynamicModule, Module } from '@nestjs/common';
-import { EnvConfigService } from './env-config.service';
 import { ConfigModule, ConfigModuleOptions } from '@nestjs/config';
 import { join } from 'path';
+import { EnvConfigService } from './env-config.service';
 
 @Module({
+  imports: [EnvConfigModule.forRoot()],
   providers: [EnvConfigService],
+  exports: [EnvConfigService],
 })
 export class EnvConfigModule extends ConfigModule {
   static async forRoot(
