@@ -1,3 +1,5 @@
+import { EntityBase } from '../../../shared/entities/entity-base';
+
 export type UserProps = {
   id?: string;
   name: string;
@@ -7,8 +9,13 @@ export type UserProps = {
   updatedAt?: Date;
 };
 
-export class User {
+export class User extends EntityBase {
   constructor(private readonly props: UserProps) {
+    super({
+      id: props.id,
+      createdAt: props.createdAt,
+      updatedAt: props.updatedAt,
+    });
     this.props = {
       ...props,
       createdAt: props.createdAt ?? new Date(),
@@ -16,9 +23,6 @@ export class User {
   }
   public getProp = () => this.props;
 
-  get id(): string | undefined {
-    return this.props.id;
-  }
   get name(): string {
     return this.props.name;
   }
@@ -28,10 +32,15 @@ export class User {
   get password(): string {
     return this.props.password;
   }
-  get createdAt(): Date | undefined {
-    return this.props.createdAt;
+
+  get id() {
+    return super.id;
   }
-  get updatedAt(): Date | undefined {
-    return this.props.updatedAt;
+
+  get createdAt(): Date {
+    return super.createdAt;
+  }
+  get updatedAt(): Date | undefined | null {
+    return super.updatedAt;
   }
 }

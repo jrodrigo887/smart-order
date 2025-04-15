@@ -1,4 +1,5 @@
 import { faker } from '@faker-js/faker';
+import { UuidUnique } from '../../../shared/vo/uuid-unique.vo';
 import { User, UserProps } from '../entities/user.entity';
 describe('UserEntity', () => {
   let sut: User;
@@ -59,16 +60,18 @@ describe('UserEntity', () => {
     expect(sut.updatedAt).toBe(userProps.updatedAt);
   });
 
-  it('should be verify nullabe id', () => {
+  it('should be verify undefined id with validator Value Object', () => {
+    // const uuidV4 = '00000000-0000-0000-0000-000000000000';
     const prop = { ...userProps, id: undefined };
     sut = new User(prop);
-    expect(sut.id).toBeUndefined();
+
+    expect(UuidUnique.validate(sut.id)).toBe(true);
   });
 
   it('should be verify nullabe updatedAt', () => {
     const prop = { ...userProps, updatedAt: undefined };
     sut = new User(prop);
-    expect(sut.updatedAt).toBeUndefined();
+    expect(sut.updatedAt).toBeNull();
   });
 
   it('should be able to create a user with default createdAt date', () => {
