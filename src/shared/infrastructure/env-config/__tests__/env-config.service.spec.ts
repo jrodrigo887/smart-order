@@ -19,8 +19,8 @@ describe('EnvConfigService', () => {
     expect(service).toBeDefined();
   });
 
-  it('should be return PORT = 3000', () => {
-    expect(service.getPOrt()).toBe(3000);
+  it('should be return PORT = 3001', () => {
+    expect(service.getPOrt()).toBe(3001);
   });
 
   it('should be return NODE_ENV = <ambiente>', () => {
