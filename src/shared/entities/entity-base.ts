@@ -4,9 +4,9 @@ import { UuidUnique } from '../vo/uuid-unique.vo';
 type Values = { id: string; createdAt: Date; updatedAt: Date };
 
 export abstract class EntityBase {
-  _id: UuidUnique;
-  _createdAt: Date;
-  _updatedAt?: Date | null;
+  private _id: UuidUnique;
+  private _createdAt: Date;
+  private _updatedAt?: Date | null;
 
   constructor(values: Partial<Values>) {
     this._id = UuidUnique.validate(values.id)

@@ -1,0 +1,86 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+
+
+datasource db {
+  provider = "sqlite" // ou mysql/sqlite/postgresql conforme o banco escolhido
+  url      = env("DATABASE_URL")
+  }
+model Order {
+  id         String      @id @default(uuid())
+  tableId    String
+  // tableId    String      @db.Uuid
+  waiterId   String
+  // waiterId   String      @db.Uuid
+  // items      String[]    // IDs dos itens pedidos, você pode fazer relação se houver uma tabela de itens no futuro
+  items      OrderItem[] // Relacionamento com os itens pedidos
+  status     OrderStatus @default(PENDING)
+  createdAt  DateTime    @default(now())
+  updatedAt  DateTime    @updatedAt
+
+  // Relations futuras, se quiser usar User (garçom), Table, etc.
+  // waiter     Waiter? @relation(fields: [waiterId], references: [id])
+  // table      Table?  @relation(fields: [tableId], references: [id])
+}
+
+model OrderItem {
+  id        String @id @default(uuid())
+  orderId   String
+  itemName  String
+  quantity  Int
+  order     Order  @relation(fields: [orderId], references: [id])
+}
+
+enum OrderStatus {
+  PENDING
+  IN_PREPARATION
+  READY
+  DELIVERED
+  CLOSED
+}
+model User {
+  id        String   @id @default(uuid())
+  name      String
+  email     String   @unique
+  password  String
+  role      UserRole @default(USER)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+}
+enum UserRole {
+  USER
+  MANAGER
+  ADMIN
+}
+
+model Waiter {
+  id            String          @id @default(uuid())
+  name          String
+  email         String          @unique
+  phone         String?
+  createdAt     DateTime        @default(now())
+
+  customerCards CustomerCard[] // Relacionamento com os cartões abertos pelo garçom
+}
+
+
+model CustomerCard {
+  id          String   @id @default(uuid())
+  cardNumber  Int
+  waiterId    String
+  openedAt    DateTime @default(now())
+  closedAt    DateTime?
+  status      CustomerCardStatus
+
+  waiter      Waiter   @relation(fields: [waiterId], references: [id])
+
+  @@unique([cardNumber, status], name: "unique_active_cardNumber")
+}
+
+enum CustomerCardStatus {
+  OPEN
+  CLOSED
+}
