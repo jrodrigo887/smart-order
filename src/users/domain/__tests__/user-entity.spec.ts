@@ -16,7 +16,6 @@ describe('UserEntity', () => {
     };
 
     sut = new User(userProps);
-    // values = Object.values(userProps);
   });
 
   it('should be able to create a user', () => {
@@ -61,7 +60,6 @@ describe('UserEntity', () => {
   });
 
   it('should be verify undefined id with validator Value Object', () => {
-    // const uuidV4 = '00000000-0000-0000-0000-000000000000';
     const prop = { ...userProps, id: undefined };
     sut = new User(prop);
 
@@ -79,5 +77,41 @@ describe('UserEntity', () => {
     sut = new User(prop);
 
     expect(sut.createdAt).toBeInstanceOf(Date);
+  });
+
+  it('should update name user', () => {
+    expect(sut.name).toEqual(userProps.name);
+
+    sut.updateName('new name');
+    expect(sut.name).toEqual('new name');
+  });
+
+  it('should update password user', () => {
+    expect(sut.password).toEqual(userProps.password);
+    const pass = faker.internet.password();
+    sut.updatePassword(pass);
+    expect(sut.password).toEqual(pass);
+  });
+  it.each([{ name: '' }, { password: '' }, { email: '' }])(
+    'Should call isNoEmpty error to name, email and password',
+    (value) => {
+      const prop = { ...userProps, ...value };
+      expect(() => User.validator(prop)).toThrow();
+    },
+  );
+  it('Should call isMaxLength error to name', () => {
+    const name = 'a'.repeat(256);
+    const prop = { ...userProps, name };
+    expect(() => User.validator(prop)).toThrow();
+  });
+  it('Should call isMaxLength error to email', () => {
+    const email = 'a'.repeat(256);
+    const prop = { ...userProps, email };
+    expect(() => User.validator(prop)).toThrow();
+  });
+  it('Should call isMaxLength error to password', () => {
+    const password = 'a'.repeat(256);
+    const prop = { ...userProps, password };
+    expect(() => User.validator(prop)).toThrow();
   });
 });

@@ -1,3 +1,4 @@
+import { ClassValidatorField } from '@/shared/validators/class-validator-field';
 import {
   IsDate,
   IsEmail,
@@ -6,7 +7,6 @@ import {
   IsString,
   MaxLength,
 } from 'class-validator';
-import { ClassValidatorField } from '../../../shared/validators/class-validator-field';
 import { UserProps } from '../entities/user.entity';
 
 export class UserRules {

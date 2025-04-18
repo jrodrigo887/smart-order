@@ -55,4 +55,11 @@ describe('EntityBase', () => {
     const entity = new StubEntity(pr);
     expect(entity.createdAt).toEqual(date);
   });
+
+  it('should updated updatedAt', () => {
+    const date = new Date();
+    expect(entity.updatedAt).toBeInstanceOf(Date);
+    entity.updatedAt = date;
+    expect(entity.updatedAt).toEqual(date);
+  });
 });
