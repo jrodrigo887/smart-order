@@ -12,7 +12,7 @@ export type UserProps = {
 };
 
 export class User extends EntityBase {
-  constructor(private readonly props: UserProps) {
+  constructor(readonly props: UserProps) {
     User.validator(props);
     super({
       id: props.id,
