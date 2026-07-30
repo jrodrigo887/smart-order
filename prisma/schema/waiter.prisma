@@ -1,0 +1,9 @@
+model Waiter {
+  id            String         @id @default(uuid())
+  name          String
+  email         String         @unique
+  phone         String?
+  createdAt     DateTime       @default(now())
+
+  customerCards CustomerCard[] // Relacionamento com os cartões abertos pelo garçom
+}

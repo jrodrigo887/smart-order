@@ -1,0 +1,20 @@
+model CustomerCard {
+  id           String    @id @default(uuid())
+  cardNumber   Int
+  waiterId     String
+  restaurantId String
+  openedAt     DateTime  @default(now())
+  closedAt     DateTime?
+  status       CustomerCardStatus
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+
+  waiter       Waiter    @relation(fields: [waiterId], references: [id])
+}
+
+enum CustomerCardStatus {
+  OPEN
+  IN_USE
+  CLOSED
+  CANCELED
+}
