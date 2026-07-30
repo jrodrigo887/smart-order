@@ -1,6 +1,6 @@
 import { Module } from '@nestjs/common';
 import { WAITER_REPOSITORY } from '../domain/repositories/waiter.repository.contract';
-import { InMemoryWaiterRepository } from './repositories/in-memory-waiter.repository';
+import { PrismaWaiterRepository } from './repositories/prisma-waiter.repository';
 import { WaitersController } from './waiters.controller';
 import { WaitersService } from './waiters.service';
 
@@ -8,7 +8,7 @@ import { WaitersService } from './waiters.service';
   controllers: [WaitersController],
   providers: [
     WaitersService,
-    { provide: WAITER_REPOSITORY, useClass: InMemoryWaiterRepository },
+    { provide: WAITER_REPOSITORY, useClass: PrismaWaiterRepository },
   ],
   exports: [WaitersService],
 })
