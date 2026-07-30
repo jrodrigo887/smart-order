@@ -1,4 +1,5 @@
 import { EntityBase, EntityProps } from '@/shared/entities/entity-base';
+import { NotFoundError } from '@/shared/errors/not-found.error';
 import { InMemoryRepository } from '../in-memory.repository';
 
 type Props<E = EntityProps> = {
@@ -37,15 +38,31 @@ describe('InMemoryRepository', () => {
     await sut.create(entity);
     const allEntities = await sut.findAll();
     expect(allEntities).toHaveLength(1);
-    // const date1 = new Date();
-    // entityProp = {
-    //   ...entityProp,
-    //   createdAt: date1,
-    //   id: '1233-1234-1235',
-    // };
-    // const entity2 = new StubEntity<Props>(entityProp);
-    // await sut.create(entity2);
-    // const result = await sut.findById('1233-1234-1235');
-    // expect(result).toStrictEqual(entityProp);
+  });
+
+  it('should find an entity by id preserving its prototype', async () => {
+    await sut.create(entity);
+    const found = await sut.findById(entity.id);
+    expect(found).toBeInstanceOf(StubEntity);
+  });
+
+  it('should update an entity, preserving its prototype', async () => {
+    await sut.create(entity);
+    const updated = await sut.update(entity.id, entity);
+    expect(updated).toBeInstanceOf(StubEntity);
+    const found = await sut.findById(entity.id);
+    expect(found).toBeInstanceOf(StubEntity);
+  });
+
+  it('should throw NotFoundError when updating an unknown id', async () => {
+    await expect(sut.update('unknown-id', entity)).rejects.toThrow(
+      NotFoundError,
+    );
+  });
+
+  it('should delete an entity', async () => {
+    await sut.create(entity);
+    await sut.delete(entity.id);
+    await expect(sut.findById(entity.id)).rejects.toThrow(NotFoundError);
   });
 });
