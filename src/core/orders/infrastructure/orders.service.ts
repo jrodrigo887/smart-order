@@ -5,14 +5,12 @@ import { CustomerCardsService } from '@/core/customer-cards/infrastructure/custo
 import { CustomerCardStatus } from '@/core/customer-cards/domain/enums/customer-card-status.enum';
 import { CustomerCardStatusError } from '@/core/customer-cards/domain/errors/customer-card-status.error';
 import { Order } from '../domain/entities/order.entity';
-import { OrderItem } from '../domain/entities/order-item.entity';
-import { OrderItemStatus } from '../domain/enums/order-item-status.enum';
-import { OrderReadyEvent } from '../domain/events/order-ready.event';
-import { UnauthorizedCancellationError } from '../domain/errors/unauthorized-cancellation.error';
 import {
   CancellationActor,
-  canCancelOrderItem,
-} from '../domain/policies/order-cancellation.policy';
+  OrderItem,
+} from '../domain/entities/order-item.entity';
+import { OrderItemStatus } from '../domain/enums/order-item-status.enum';
+import { OrderReadyEvent } from '../domain/events/order-ready.event';
 import {
   ORDER_REPOSITORY,
   OrderRepositoryContract,
@@ -95,13 +93,7 @@ export class OrdersService {
     actor?: CancellationActor,
   ): Promise<Order> {
     const order = await this.repository.findById(orderId);
-    const item = order.findItem(itemId);
-    if (!canCancelOrderItem(item.status, actor)) {
-      throw new UnauthorizedCancellationError(
-        'Cancelling an OrderItem that already started preparing requires Owner authorization',
-      );
-    }
-    item.cancel();
+    order.findItem(itemId).cancel(actor);
     return this.repository.update(orderId, order);
   }
 

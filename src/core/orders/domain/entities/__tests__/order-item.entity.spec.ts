@@ -1,7 +1,12 @@
 import { faker } from '@faker-js/faker';
 import { OrderItemStatus } from '../../enums/order-item-status.enum';
 import { OrderItemStatusError } from '../../errors/order-item-status.error';
-import { OrderItem, OrderItemProps } from '../order-item.entity';
+import { UnauthorizedCancellationError } from '../../errors/unauthorized-cancellation.error';
+import {
+  CancellationRole,
+  OrderItem,
+  OrderItemProps,
+} from '../order-item.entity';
 
 describe('OrderItemEntity', () => {
   let orderItem: OrderItem;
@@ -56,9 +61,9 @@ describe('OrderItemEntity', () => {
     expect(orderItem.status).toEqual(OrderItemStatus.CANCELED);
   });
 
-  it('should cancel an item already in preparation', () => {
+  it('should cancel an item already in preparation when authorized by an Owner actor', () => {
     orderItem.startPreparing();
-    orderItem.cancel();
+    orderItem.cancel({ role: CancellationRole.OWNER });
     expect(orderItem.status).toEqual(OrderItemStatus.CANCELED);
   });
 
@@ -67,6 +72,43 @@ describe('OrderItemEntity', () => {
     (status) => {
       orderItem = OrderItem.create({ ...props, status });
       expect(() => orderItem.cancel()).toThrow(OrderItemStatusError);
+    },
+  );
+
+  it.each([[OrderItemStatus.PREPARING], [OrderItemStatus.PREPARED]] as const)(
+    'should not cancel a %s item with no actor',
+    (status) => {
+      orderItem = OrderItem.create({ ...props, status });
+      expect(() => orderItem.cancel()).toThrow(UnauthorizedCancellationError);
+    },
+  );
+
+  it.each([[OrderItemStatus.PREPARING], [OrderItemStatus.PREPARED]] as const)(
+    'should not cancel a %s item for a non-Owner actor',
+    (status) => {
+      orderItem = OrderItem.create({ ...props, status });
+      expect(() => orderItem.cancel({ role: CancellationRole.WAITER })).toThrow(
+        UnauthorizedCancellationError,
+      );
+    },
+  );
+
+  it.each([[OrderItemStatus.PREPARING], [OrderItemStatus.PREPARED]] as const)(
+    'should cancel a %s item for an Owner actor',
+    (status) => {
+      orderItem = OrderItem.create({ ...props, status });
+      orderItem.cancel({ role: CancellationRole.OWNER });
+      expect(orderItem.status).toEqual(OrderItemStatus.CANCELED);
+    },
+  );
+
+  it.each([[OrderItemStatus.DELIVERED], [OrderItemStatus.CANCELED]] as const)(
+    'should throw OrderItemStatusError for a %s item even for an Owner actor',
+    (status) => {
+      orderItem = OrderItem.create({ ...props, status });
+      expect(() => orderItem.cancel({ role: CancellationRole.OWNER })).toThrow(
+        OrderItemStatusError,
+      );
     },
   );
 });

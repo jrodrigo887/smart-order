@@ -7,7 +7,7 @@ import { CustomerCardStatusError } from '@/core/customer-cards/domain/errors/cus
 import { NotFoundError } from '@/shared/errors/not-found.error';
 import { UnauthorizedCancellationError } from '../../domain/errors/unauthorized-cancellation.error';
 import { OrderReadyEvent } from '../../domain/events/order-ready.event';
-import { CancellationRole } from '../../domain/policies/order-cancellation.policy';
+import { CancellationRole } from '../../domain/entities/order-item.entity';
 import { InMemoryOrderRepository } from '../repositories/in-memory-order.repository';
 import { LaunchOrderInput, OrdersService } from '../orders.service';
 

@@ -1,9 +1,20 @@
 import { EntityBase } from '@/shared/entities/entity-base';
 import { OrderItemStatusError } from '../errors/order-item-status.error';
+import { UnauthorizedCancellationError } from '../errors/unauthorized-cancellation.error';
 import {
   OrderItemStatus,
   OrderItemStatusType,
 } from '../enums/order-item-status.enum';
+
+export const CancellationRole = {
+  OWNER: 'OWNER',
+  WAITER: 'WAITER',
+} as const;
+
+export type CancellationRoleType =
+  (typeof CancellationRole)[keyof typeof CancellationRole];
+
+export type CancellationActor = { role: CancellationRoleType };
 
 export type OrderItemProps = {
   orderId: string;
@@ -74,16 +85,24 @@ export class OrderItem extends EntityBase {
     this.props.updatedAt = new Date();
   }
 
-  // Whether an actor is authorized to cancel a non-CREATED item is decided
-  // upstream by OrderCancellationPolicy (ADR-0004) — this only enforces that
-  // a finished item (DELIVERED/CANCELED) can never be cancelled.
-  public cancel(): void {
+  // ADR-0004: an item still CREATED cancels freely; once the kitchen starts
+  // preparing it, cancelling requires Owner authorization.
+  public cancel(actor?: CancellationActor): void {
     if (
       this.props.status === OrderItemStatus.CANCELED ||
       this.props.status === OrderItemStatus.DELIVERED
     ) {
       throw new OrderItemStatusError(
         `Cannot cancel an OrderItem with status ${this.props.status}`,
+      );
+    }
+    if (
+      (this.props.status === OrderItemStatus.PREPARING ||
+        this.props.status === OrderItemStatus.PREPARED) &&
+      actor?.role !== CancellationRole.OWNER
+    ) {
+      throw new UnauthorizedCancellationError(
+        'Cancelling an OrderItem that already started preparing requires Owner authorization',
       );
     }
     this.props.status = OrderItemStatus.CANCELED;
