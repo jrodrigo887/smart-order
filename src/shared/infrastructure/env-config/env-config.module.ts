@@ -14,7 +14,7 @@ export class EnvConfigModule extends ConfigModule {
   ): Promise<DynamicModule> {
     return await super.forRoot({
       envFilePath: [
-        join(__dirname, '..', '..', '..', '..', `.env.${process.env.NODE_ENV}`),
+        join(process.cwd(), `.env.${process.env.NODE_ENV}`),
       ],
       ...options,
     });

@@ -1,0 +1,47 @@
+{
+  "name": "@smart-order/payments-sdk",
+  "version": "0.0.1",
+  "description": "Núcleo hexagonal de pagamentos, agnóstico de provedor e de framework.",
+  "author": "",
+  "private": true,
+  "license": "UNLICENSED",
+  "main": "src/index.ts",
+  "types": "src/index.ts",
+  "exports": {
+    ".": {
+      "types": "./src/index.ts",
+      "default": "./src/index.ts"
+    },
+    "./nest": {
+      "types": "./src/nest/index.ts",
+      "default": "./src/nest/index.ts"
+    }
+  },
+  "scripts": {
+    "test-unit": "cross-env NODE_ENV=test jest --config jest.unit.config.ts"
+  },
+  "dependencies": {
+    "uuid": "^11.1.0"
+  },
+  "peerDependencies": {
+    "@nestjs/common": "^11.0.1"
+  },
+  "peerDependenciesMeta": {
+    "@nestjs/common": {
+      "optional": true
+    }
+  },
+  "devDependencies": {
+    "@nestjs/common": "^11.0.1",
+    "@nestjs/testing": "^11.0.1",
+    "@types/jest": "^29.5.14",
+    "@types/node": "^22.10.7",
+    "@types/uuid": "^10.0.0",
+    "cross-env": "^7.0.3",
+    "jest": "^29.7.0",
+    "reflect-metadata": "^0.2.2",
+    "rxjs": "^7.8.1",
+    "ts-jest": "^29.3.2",
+    "typescript": "^5.7.3"
+  }
+}
