@@ -62,5 +62,9 @@ yarn.lock
 
 # Files
 docs/*
+http
+openspec
+.codex
+.claude
 CLAUDE.md
 CONTEXT.md
