@@ -29,4 +29,15 @@ export abstract class EntityBase {
   public set updatedAt(upd: Date) {
     this._updatedAt = upd;
   }
+
+  // props may carry a stale id/createdAt/updatedAt (e.g. rehydrated from
+  // persistence) — the getters below are the source of truth and always win.
+  public toJSON(): Record<string, unknown> {
+    return {
+      ...this.props,
+      id: this.id,
+      createdAt: this.createdAt,
+      updatedAt: this.updatedAt,
+    };
+  }
 }

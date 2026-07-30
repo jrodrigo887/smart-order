@@ -5,11 +5,13 @@ import { ORDER_REPOSITORY } from '../domain/repositories/order.repository.contra
 import { WAITER_ALERT_NOTIFIER } from '../domain/ports/waiter-alert-notifier';
 import { OrderReadyHandler } from './handlers/order-ready.handler';
 import { NoopWaiterAlertNotifier } from './notifiers/noop-waiter-alert.notifier';
+import { OrdersController } from './orders.controller';
 import { InMemoryOrderRepository } from './repositories/in-memory-order.repository';
 import { OrdersService } from './orders.service';
 
 @Module({
   imports: [CqrsModule, CustomerCardsModule],
+  controllers: [OrdersController],
   providers: [
     OrdersService,
     OrderReadyHandler,
