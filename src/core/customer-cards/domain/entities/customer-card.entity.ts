@@ -1,5 +1,6 @@
 import { EntityBase } from '@/shared/entities/entity-base';
 import { UuidUnique } from '@shared/vo/uuid-unique.vo';
+import { CustomerCardStatusError } from '../errors/customer-card-status.error';
 import {
   CustomerCardStatus,
   CustomerCardStatusType,
@@ -8,6 +9,7 @@ import {
 export type CustomerCardProps = {
   cardNumber: number;
   waiterId: string; // uuid
+  restaurantId: string; // uuid
   openedAt: Date;
   status: CustomerCardStatusType;
   closedAt: Date | null;
@@ -16,8 +18,10 @@ export type CustomerCardProps = {
   updatedAt?: Date | undefined;
 };
 
+const CANCEL_WINDOW_MINUTES = 30;
+
 export class CustomerCard extends EntityBase {
-  private constructor(private readonly props: CustomerCardProps) {
+  private constructor(public readonly props: CustomerCardProps) {
     super({
       id: props.id,
       createdAt: props.createdAt,
@@ -37,7 +41,12 @@ export class CustomerCard extends EntityBase {
     return this.props.waiterId;
   }
 
+  public get restaurantId(): string {
+    return this.props.restaurantId;
+  }
+
   public updateWaiterId(id: string): void {
+    this.assertMutable('update waiterId of');
     const validId = UuidUnique.create(id);
     this.props.waiterId = validId.getValue();
     this.props.updatedAt = new Date();
@@ -55,13 +64,51 @@ export class CustomerCard extends EntityBase {
     return this.props.status;
   }
 
+  public startUsing(): void {
+    if (this.props.status !== CustomerCardStatus.OPEN) {
+      throw new CustomerCardStatusError(
+        `Cannot start using a CustomerCard with status ${this.props.status}`,
+      );
+    }
+    this.props.status = CustomerCardStatus.IN_USE;
+    this.props.updatedAt = new Date();
+  }
+
   public close() {
+    this.assertMutable('close');
     this.props.closedAt = new Date();
     this.props.updatedAt = new Date();
     this.props.status = CustomerCardStatus.CLOSED;
   }
 
+  public cancel(firstOrderAt?: Date, now: Date = new Date()): void {
+    this.assertMutable('cancel');
+    if (firstOrderAt) {
+      const elapsedMinutes =
+        (now.getTime() - firstOrderAt.getTime()) / (60 * 1000);
+      if (elapsedMinutes > CANCEL_WINDOW_MINUTES) {
+        throw new CustomerCardStatusError(
+          `Cannot cancel a CustomerCard more than ${CANCEL_WINDOW_MINUTES} minutes after the first Order`,
+        );
+      }
+    }
+    this.props.closedAt = now;
+    this.props.updatedAt = now;
+    this.props.status = CustomerCardStatus.CANCELED;
+  }
+
   public isOpen(): boolean {
     return this.props.status === CustomerCardStatus.OPEN;
+  }
+
+  private assertMutable(action: string): void {
+    if (
+      this.props.status === CustomerCardStatus.CLOSED ||
+      this.props.status === CustomerCardStatus.CANCELED
+    ) {
+      throw new CustomerCardStatusError(
+        `Cannot ${action} a CustomerCard with status ${this.props.status}`,
+      );
+    }
   }
 }
