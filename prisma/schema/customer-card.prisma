@@ -4,6 +4,7 @@ model CustomerCard {
   waiterId     String
   restaurantId String
   openedAt     DateTime  @default(now())
+  firstOrderAt DateTime?
   closedAt     DateTime?
   status       CustomerCardStatus
   createdAt    DateTime  @default(now())

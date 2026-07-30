@@ -64,21 +64,25 @@ describe('CustomerCardEntity', () => {
   });
 
   it('should cancel an IN_USE card within 30 minutes of the first Order', () => {
-    customerCard.startUsing();
     const firstOrderAt = new Date();
+    customerCard.startUsing(firstOrderAt);
     const now = new Date(firstOrderAt.getTime() + 29 * 60 * 1000);
-    customerCard.cancel(firstOrderAt, now);
+    customerCard.cancel(now);
     expect(customerCard.status).toEqual(CustomerCardStatus.CANCELED);
   });
 
   it('should not cancel a card more than 30 minutes after the first Order', () => {
-    customerCard.startUsing();
     const firstOrderAt = new Date();
+    customerCard.startUsing(firstOrderAt);
     const now = new Date(firstOrderAt.getTime() + 31 * 60 * 1000);
-    expect(() => customerCard.cancel(firstOrderAt, now)).toThrow(
-      CustomerCardStatusError,
-    );
+    expect(() => customerCard.cancel(now)).toThrow(CustomerCardStatusError);
     expect(customerCard.status).toEqual(CustomerCardStatus.IN_USE);
+  });
+
+  it('should record firstOrderAt when starting to use the card', () => {
+    const firstOrderAt = new Date();
+    customerCard.startUsing(firstOrderAt);
+    expect(customerCard.firstOrderAt).toEqual(firstOrderAt);
   });
 
   it.each([

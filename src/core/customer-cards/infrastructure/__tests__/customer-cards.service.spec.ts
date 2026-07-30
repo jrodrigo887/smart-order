@@ -72,22 +72,22 @@ describe('CustomerCardsService', () => {
 
   it('should cancel an IN_USE CustomerCard within 30 minutes of the first Order', async () => {
     const opened = await sut.open(input);
-    await sut.markInUse(opened.id);
     const firstOrderAt = new Date();
+    await sut.markInUse(opened.id, firstOrderAt);
     const now = new Date(firstOrderAt.getTime() + 10 * 60 * 1000);
 
-    const canceled = await sut.cancel(opened.id, firstOrderAt, now);
+    const canceled = await sut.cancel(opened.id, now);
 
     expect(canceled.status).toEqual(CustomerCardStatus.CANCELED);
   });
 
   it('should not cancel a CustomerCard more than 30 minutes after the first Order', async () => {
     const opened = await sut.open(input);
-    await sut.markInUse(opened.id);
     const firstOrderAt = new Date();
+    await sut.markInUse(opened.id, firstOrderAt);
     const now = new Date(firstOrderAt.getTime() + 31 * 60 * 1000);
 
-    await expect(sut.cancel(opened.id, firstOrderAt, now)).rejects.toThrow(
+    await expect(sut.cancel(opened.id, now)).rejects.toThrow(
       CustomerCardStatusError,
     );
   });

@@ -35,9 +35,9 @@ export class CustomerCardsService {
     return this.repository.findById(id);
   }
 
-  async markInUse(id: string): Promise<CustomerCard> {
+  async markInUse(id: string, now?: Date): Promise<CustomerCard> {
     const customerCard = await this.repository.findById(id);
-    customerCard.startUsing();
+    customerCard.startUsing(now);
     return this.repository.update(id, customerCard);
   }
 
@@ -47,13 +47,9 @@ export class CustomerCardsService {
     return this.repository.update(id, customerCard);
   }
 
-  async cancel(
-    id: string,
-    firstOrderAt?: Date,
-    now?: Date,
-  ): Promise<CustomerCard> {
+  async cancel(id: string, now?: Date): Promise<CustomerCard> {
     const customerCard = await this.repository.findById(id);
-    customerCard.cancel(firstOrderAt, now);
+    customerCard.cancel(now);
     return this.repository.update(id, customerCard);
   }
 

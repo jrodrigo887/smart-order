@@ -53,6 +53,7 @@ export class PrismaCustomerCardRepository
       waiterId: record.waiterId,
       restaurantId: record.restaurantId,
       openedAt: record.openedAt,
+      firstOrderAt: record.firstOrderAt,
       closedAt: record.closedAt,
       status: record.status as CustomerCardStatusType,
       createdAt: record.createdAt,
@@ -67,6 +68,7 @@ export class PrismaCustomerCardRepository
       waiterId: card.waiterId,
       restaurantId: card.restaurantId,
       openedAt: card.openedAt,
+      firstOrderAt: card.firstOrderAt,
       closedAt: card.closedAt,
       status: card.status,
     };

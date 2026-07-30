@@ -13,6 +13,7 @@ export type CustomerCardProps = {
   openedAt: Date;
   status: CustomerCardStatusType;
   closedAt: Date | null;
+  firstOrderAt?: Date | null;
   id?: string;
   createdAt?: Date;
   updatedAt?: Date | undefined;
@@ -60,18 +61,23 @@ export class CustomerCard extends EntityBase {
     return this.props.closedAt;
   }
 
+  public get firstOrderAt(): Date | null {
+    return this.props.firstOrderAt ?? null;
+  }
+
   public get status(): CustomerCardStatusType {
     return this.props.status;
   }
 
-  public startUsing(): void {
+  public startUsing(now: Date = new Date()): void {
     if (this.props.status !== CustomerCardStatus.OPEN) {
       throw new CustomerCardStatusError(
         `Cannot start using a CustomerCard with status ${this.props.status}`,
       );
     }
     this.props.status = CustomerCardStatus.IN_USE;
-    this.props.updatedAt = new Date();
+    this.props.firstOrderAt = now;
+    this.props.updatedAt = now;
   }
 
   public close() {
@@ -81,11 +87,11 @@ export class CustomerCard extends EntityBase {
     this.props.status = CustomerCardStatus.CLOSED;
   }
 
-  public cancel(firstOrderAt?: Date, now: Date = new Date()): void {
+  public cancel(now: Date = new Date()): void {
     this.assertMutable('cancel');
-    if (firstOrderAt) {
+    if (this.props.firstOrderAt) {
       const elapsedMinutes =
-        (now.getTime() - firstOrderAt.getTime()) / (60 * 1000);
+        (now.getTime() - this.props.firstOrderAt.getTime()) / (60 * 1000);
       if (elapsedMinutes > CANCEL_WINDOW_MINUTES) {
         throw new CustomerCardStatusError(
           `Cannot cancel a CustomerCard more than ${CANCEL_WINDOW_MINUTES} minutes after the first Order`,
