@@ -7,6 +7,8 @@ import { UsersModule } from './users/infrastructure/users.module';
 import { CustomerCardsModule } from './core/customer-cards/infrastructure/customer-cards.module';
 import { OrdersModule } from './core/orders/infrastructure/orders.module';
 import { WaitersModule } from './core/waiters/infrastructure/waiters.module';
+import { CompaniesModule } from './core/companies/infrastructure/companies.module';
+import { EstablishmentsModule } from './core/establishments/infrastructure/establishments.module';
 
 @Module({
   imports: [
@@ -16,6 +18,8 @@ import { WaitersModule } from './core/waiters/infrastructure/waiters.module';
     CustomerCardsModule,
     OrdersModule,
     WaitersModule,
+    CompaniesModule,
+    EstablishmentsModule,
   ],
   controllers: [AppController],
   providers: [AppService],
