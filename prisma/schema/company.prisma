@@ -8,4 +8,5 @@ model Company {
   updatedAt     DateTime @updatedAt
 
   establishments Establishment[]
+  companyRoles   CompanyRole[]
 }

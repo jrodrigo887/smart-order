@@ -5,4 +5,7 @@ model User {
   password  String
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+
+  companyRoles        CompanyRole[]
+  establishmentAccess EstablishmentAccess[]
 }

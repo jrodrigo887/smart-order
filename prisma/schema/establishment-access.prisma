@@ -1,0 +1,12 @@
+model EstablishmentAccess {
+  id              String   @id @default(uuid())
+  userId          String
+  establishmentId String
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  user          User          @relation(fields: [userId], references: [id])
+  establishment Establishment @relation(fields: [establishmentId], references: [id])
+
+  @@unique([userId, establishmentId])
+}
