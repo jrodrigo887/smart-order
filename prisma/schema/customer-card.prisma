@@ -1,16 +1,17 @@
 model CustomerCard {
-  id           String    @id @default(uuid())
-  cardNumber   Int
-  waiterId     String
-  restaurantId String
-  openedAt     DateTime  @default(now())
-  firstOrderAt DateTime?
-  closedAt     DateTime?
-  status       CustomerCardStatus
-  createdAt    DateTime  @default(now())
-  updatedAt    DateTime  @updatedAt
+  id              String    @id @default(uuid())
+  cardNumber      Int
+  collaboratorId  String
+  establishmentId String
+  openedAt        DateTime  @default(now())
+  firstOrderAt    DateTime?
+  closedAt        DateTime?
+  status          CustomerCardStatus
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
 
-  waiter       Waiter    @relation(fields: [waiterId], references: [id])
+  collaborator  Collaborator  @relation(fields: [collaboratorId], references: [id])
+  establishment Establishment @relation(fields: [establishmentId], references: [id])
 }
 
 enum CustomerCardStatus {

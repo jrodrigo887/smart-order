@@ -17,7 +17,7 @@ describe('CustomerCardsController', () => {
             markInUse: jest.fn(),
             close: jest.fn(),
             cancel: jest.fn(),
-            listByRestaurant: jest.fn(),
+            listByEstablishment: jest.fn(),
           },
         },
       ],

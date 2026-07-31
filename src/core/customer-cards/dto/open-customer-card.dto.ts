@@ -6,8 +6,8 @@ export class OpenCustomerCardDto {
   cardNumber: number;
 
   @IsUUID()
-  waiterId: string;
+  collaboratorId: string;
 
   @IsUUID()
-  restaurantId: string;
+  establishmentId: string;
 }

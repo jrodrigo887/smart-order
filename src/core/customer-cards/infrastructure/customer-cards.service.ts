@@ -8,8 +8,8 @@ import {
 
 export type OpenCustomerCardInput = {
   cardNumber: number;
-  waiterId: string;
-  restaurantId: string;
+  collaboratorId: string;
+  establishmentId: string;
 };
 
 @Injectable()
@@ -22,8 +22,8 @@ export class CustomerCardsService {
   async open(input: OpenCustomerCardInput): Promise<CustomerCard> {
     const customerCard = CustomerCard.create({
       cardNumber: input.cardNumber,
-      waiterId: input.waiterId,
-      restaurantId: input.restaurantId,
+      collaboratorId: input.collaboratorId,
+      establishmentId: input.establishmentId,
       openedAt: new Date(),
       closedAt: null,
       status: CustomerCardStatus.OPEN,
@@ -53,8 +53,8 @@ export class CustomerCardsService {
     return this.repository.update(id, customerCard);
   }
 
-  async listByRestaurant(restaurantId: string): Promise<CustomerCard[]> {
+  async listByEstablishment(establishmentId: string): Promise<CustomerCard[]> {
     const all = await this.repository.findAll();
-    return all.filter((card) => card.restaurantId === restaurantId);
+    return all.filter((card) => card.establishmentId === establishmentId);
   }
 }

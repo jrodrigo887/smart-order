@@ -1,18 +1,18 @@
 model Order {
-  id         String      @id @default(uuid())
-  tableId    String
+  id              String      @id @default(uuid())
+  tableId         String
   // tableId    String      @db.Uuid
-  waiterId   String
-  // waiterId   String      @db.Uuid
+  collaboratorId  String
+  establishmentId String
   // items      String[]    // IDs dos itens pedidos, você pode fazer relação se houver uma tabela de itens no futuro
   items      OrderItem[] // Relacionamento com os itens pedidos
   status     OrderStatus @default(PENDING)
   createdAt  DateTime    @default(now())
   updatedAt  DateTime    @updatedAt
 
-  // Relations futuras, se quiser usar User (garçom), Table, etc.
-  // waiter     Waiter? @relation(fields: [waiterId], references: [id])
-  // table      Table?  @relation(fields: [tableId], references: [id])
+  // Relations futuras, se quiser usar User (colaborador), Table, etc.
+  // collaborator Collaborator? @relation(fields: [collaboratorId], references: [id])
+  // table        Table?        @relation(fields: [tableId], references: [id])
 }
 
 model OrderItem {

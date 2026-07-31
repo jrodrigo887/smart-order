@@ -58,7 +58,7 @@ export class OrdersService {
     const order = Order.create({
       id: orderId,
       customerCardId: customerCard.id,
-      restaurantId: customerCard.restaurantId,
+      establishmentId: customerCard.establishmentId,
       items,
     });
     return this.repository.create(order);
@@ -97,10 +97,10 @@ export class OrdersService {
     return this.repository.update(orderId, order);
   }
 
-  async listPendingByRestaurant(restaurantId: string): Promise<Order[]> {
+  async listPendingByEstablishment(establishmentId: string): Promise<Order[]> {
     const all = await this.repository.findAll();
     return all.filter(
-      (order) => order.restaurantId === restaurantId && !order.isReady(),
+      (order) => order.establishmentId === establishmentId && !order.isReady(),
     );
   }
 }

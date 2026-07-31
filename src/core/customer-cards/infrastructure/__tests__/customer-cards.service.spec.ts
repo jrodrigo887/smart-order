@@ -8,15 +8,19 @@ import { CustomerCardsService } from '../customer-cards.service';
 describe('CustomerCardsService', () => {
   let sut: CustomerCardsService;
   let repository: InMemoryCustomerCardRepository;
-  let input: { cardNumber: number; waiterId: string; restaurantId: string };
+  let input: {
+    cardNumber: number;
+    collaboratorId: string;
+    establishmentId: string;
+  };
 
   beforeEach(() => {
     repository = new InMemoryCustomerCardRepository();
     sut = new CustomerCardsService(repository);
     input = {
       cardNumber: faker.number.int({ min: 1, max: 999 }),
-      waiterId: faker.string.uuid(),
-      restaurantId: faker.string.uuid(),
+      collaboratorId: faker.string.uuid(),
+      establishmentId: faker.string.uuid(),
     };
   });
 
@@ -33,8 +37,8 @@ describe('CustomerCardsService', () => {
 
     expect(customerCard.id).toBeDefined();
     expect(customerCard.cardNumber).toEqual(input.cardNumber);
-    expect(customerCard.waiterId).toEqual(input.waiterId);
-    expect(customerCard.restaurantId).toEqual(input.restaurantId);
+    expect(customerCard.collaboratorId).toEqual(input.collaboratorId);
+    expect(customerCard.establishmentId).toEqual(input.establishmentId);
     expect(customerCard.status).toEqual(CustomerCardStatus.OPEN);
   });
 
@@ -103,11 +107,11 @@ describe('CustomerCardsService', () => {
     await expect(sut.close(faker.string.uuid())).rejects.toThrow(NotFoundError);
   });
 
-  it('should list only CustomerCards from the given restaurant', async () => {
+  it('should list only CustomerCards from the given establishment', async () => {
     const opened = await sut.open(input);
-    await sut.open({ ...input, restaurantId: faker.string.uuid() });
+    await sut.open({ ...input, establishmentId: faker.string.uuid() });
 
-    const result = await sut.listByRestaurant(input.restaurantId);
+    const result = await sut.listByEstablishment(input.establishmentId);
 
     expect(result).toHaveLength(1);
     expect(result[0].id).toEqual(opened.id);

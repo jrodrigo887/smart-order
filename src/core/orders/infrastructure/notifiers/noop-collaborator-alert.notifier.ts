@@ -1,8 +1,10 @@
 import { Injectable } from '@nestjs/common';
-import { WaiterAlertNotifier } from '../../domain/ports/waiter-alert-notifier';
+import { CollaboratorAlertNotifier } from '../../domain/ports/collaborator-alert-notifier';
 
 // Placeholder until a real delivery channel (push/socket/SMS) is wired up.
 @Injectable()
-export class NoopWaiterAlertNotifier implements WaiterAlertNotifier {
+export class NoopCollaboratorAlertNotifier
+  implements CollaboratorAlertNotifier
+{
   async notifyOrderReady(): Promise<void> {}
 }

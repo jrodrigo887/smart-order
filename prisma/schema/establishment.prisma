@@ -8,7 +8,9 @@ model Establishment {
   createdAt DateTime              @default(now())
   updatedAt DateTime              @updatedAt
 
-  company Company @relation(fields: [companyId], references: [id])
+  company       Company        @relation(fields: [companyId], references: [id])
+  collaborators Collaborator[]
+  customerCards CustomerCard[]
 }
 
 enum EstablishmentUnitType {

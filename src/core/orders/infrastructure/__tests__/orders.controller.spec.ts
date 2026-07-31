@@ -13,7 +13,7 @@ describe('OrdersController', () => {
           provide: OrdersService,
           useValue: {
             launch: jest.fn(),
-            listPendingByRestaurant: jest.fn(),
+            listPendingByEstablishment: jest.fn(),
             startPreparingItem: jest.fn(),
             markItemPrepared: jest.fn(),
             markItemDelivered: jest.fn(),

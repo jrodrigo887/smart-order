@@ -9,8 +9,8 @@ describe('CustomerCardEntity', () => {
   beforeEach(() => {
     userProps = {
       id: faker.string.uuid(),
-      waiterId: faker.string.uuid(),
-      restaurantId: faker.string.uuid(),
+      collaboratorId: faker.string.uuid(),
+      establishmentId: faker.string.uuid(),
       cardNumber: 123,
       status: CustomerCardStatus.OPEN,
       createdAt: new Date(),
@@ -25,8 +25,8 @@ describe('CustomerCardEntity', () => {
   });
   it('should have the correct properties', () => {
     expect(customerCard.cardNumber).toEqual(userProps.cardNumber);
-    expect(customerCard.waiterId).toEqual(userProps.waiterId);
-    expect(customerCard.restaurantId).toEqual(userProps.restaurantId);
+    expect(customerCard.collaboratorId).toEqual(userProps.collaboratorId);
+    expect(customerCard.establishmentId).toEqual(userProps.establishmentId);
     expect(customerCard.openedAt).toEqual(userProps.openedAt);
     expect(customerCard.closedAt).toEqual(userProps.closedAt);
     expect(customerCard.status).toEqual(userProps.status);
@@ -36,10 +36,10 @@ describe('CustomerCardEntity', () => {
     expect(customerCard.closedAt).not.toBeNull();
     expect(customerCard.status).toEqual(CustomerCardStatus.CLOSED);
   });
-  it('update waiterID', () => {
-    const newWaiterId = faker.string.uuid();
-    customerCard.updateWaiterId(newWaiterId);
-    expect(customerCard.waiterId).toEqual(newWaiterId);
+  it('update collaboratorId', () => {
+    const newCollaboratorId = faker.string.uuid();
+    customerCard.updateCollaboratorId(newCollaboratorId);
+    expect(customerCard.collaboratorId).toEqual(newCollaboratorId);
   });
   it('should check if the card wis open', () => {
     expect(customerCard.isOpen()).toBe(true);
@@ -88,7 +88,10 @@ describe('CustomerCardEntity', () => {
   it.each([
     ['close', () => customerCard.close()],
     ['cancel', () => customerCard.cancel()],
-    ['updateWaiterId', () => customerCard.updateWaiterId(faker.string.uuid())],
+    [
+      'updateCollaboratorId',
+      () => customerCard.updateCollaboratorId(faker.string.uuid()),
+    ],
   ])('should not %s an already CLOSED card', (_action, act) => {
     customerCard.close();
     expect(act).toThrow(CustomerCardStatusError);
@@ -97,7 +100,10 @@ describe('CustomerCardEntity', () => {
   it.each([
     ['close', () => customerCard.close()],
     ['cancel', () => customerCard.cancel()],
-    ['updateWaiterId', () => customerCard.updateWaiterId(faker.string.uuid())],
+    [
+      'updateCollaboratorId',
+      () => customerCard.updateCollaboratorId(faker.string.uuid()),
+    ],
   ])('should not %s an already CANCELED card', (_action, act) => {
     customerCard.cancel();
     expect(act).toThrow(CustomerCardStatusError);

@@ -17,7 +17,7 @@ describe('OrdersService', () => {
   let customerCardsService: CustomerCardsService;
   let eventBus: { publish: jest.Mock };
   let customerCardId: string;
-  let restaurantId: string;
+  let establishmentId: string;
   let launchInput: LaunchOrderInput;
 
   beforeEach(async () => {
@@ -32,11 +32,11 @@ describe('OrdersService', () => {
       eventBus as unknown as EventBus,
     );
 
-    restaurantId = faker.string.uuid();
+    establishmentId = faker.string.uuid();
     const customerCard = await customerCardsService.open({
       cardNumber: faker.number.int({ min: 1, max: 999 }),
-      waiterId: faker.string.uuid(),
-      restaurantId,
+      collaboratorId: faker.string.uuid(),
+      establishmentId,
     });
     customerCardId = customerCard.id;
     launchInput = {
@@ -53,7 +53,7 @@ describe('OrdersService', () => {
 
     expect(order.id).toBeDefined();
     expect(order.customerCardId).toEqual(customerCardId);
-    expect(order.restaurantId).toEqual(restaurantId);
+    expect(order.establishmentId).toEqual(establishmentId);
     expect(order.items).toHaveLength(2);
     expect(order.items[1].quantity).toEqual(2);
   });
@@ -160,10 +160,10 @@ describe('OrdersService', () => {
     ).rejects.toThrow(NotFoundError);
   });
 
-  it('should list only pending (not-ready) orders for a restaurant', async () => {
+  it('should list only pending (not-ready) orders for an establishment', async () => {
     const order = await sut.launch(launchInput);
 
-    const pending = await sut.listPendingByRestaurant(restaurantId);
+    const pending = await sut.listPendingByEstablishment(establishmentId);
 
     expect(pending).toHaveLength(1);
     expect(pending[0].id).toEqual(order.id);
@@ -176,7 +176,7 @@ describe('OrdersService', () => {
       await sut.markItemPrepared(order.id, item.id);
     }
 
-    const pending = await sut.listPendingByRestaurant(restaurantId);
+    const pending = await sut.listPendingByEstablishment(establishmentId);
 
     expect(pending).toHaveLength(0);
   });

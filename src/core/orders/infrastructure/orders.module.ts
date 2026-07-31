@@ -2,9 +2,9 @@ import { Module } from '@nestjs/common';
 import { CqrsModule } from '@nestjs/cqrs';
 import { CustomerCardsModule } from '@/core/customer-cards/infrastructure/customer-cards.module';
 import { ORDER_REPOSITORY } from '../domain/repositories/order.repository.contract';
-import { WAITER_ALERT_NOTIFIER } from '../domain/ports/waiter-alert-notifier';
+import { COLLABORATOR_ALERT_NOTIFIER } from '../domain/ports/collaborator-alert-notifier';
 import { OrderReadyHandler } from './handlers/order-ready.handler';
-import { NoopWaiterAlertNotifier } from './notifiers/noop-waiter-alert.notifier';
+import { NoopCollaboratorAlertNotifier } from './notifiers/noop-collaborator-alert.notifier';
 import { OrdersController } from './orders.controller';
 import { InMemoryOrderRepository } from './repositories/in-memory-order.repository';
 import { OrdersService } from './orders.service';
@@ -16,7 +16,10 @@ import { OrdersService } from './orders.service';
     OrdersService,
     OrderReadyHandler,
     { provide: ORDER_REPOSITORY, useClass: InMemoryOrderRepository },
-    { provide: WAITER_ALERT_NOTIFIER, useClass: NoopWaiterAlertNotifier },
+    {
+      provide: COLLABORATOR_ALERT_NOTIFIER,
+      useClass: NoopCollaboratorAlertNotifier,
+    },
   ],
   exports: [OrdersService],
 })

@@ -1,0 +1,20 @@
+model Collaborator {
+  id              String           @id @default(uuid())
+  name            String
+  establishmentId String
+  userId          String?
+  role            CollaboratorRole
+  createdAt       DateTime         @default(now())
+  updatedAt       DateTime         @updatedAt
+
+  establishment Establishment  @relation(fields: [establishmentId], references: [id])
+  customerCards CustomerCard[]
+}
+
+enum CollaboratorRole {
+  WAITER
+  OWNER
+  KITCHEN_STAFF
+  CASHIER
+  CLEANING
+}

@@ -31,8 +31,8 @@ export class CustomerCardsController {
     return this.customerCardsService.cancel(id);
   }
 
-  @Get('restaurants/:restaurantId/customer-cards')
-  listByRestaurant(@Param('restaurantId') restaurantId: string) {
-    return this.customerCardsService.listByRestaurant(restaurantId);
+  @Get('establishments/:establishmentId/customer-cards')
+  listByEstablishment(@Param('establishmentId') establishmentId: string) {
+    return this.customerCardsService.listByEstablishment(establishmentId);
   }
 }

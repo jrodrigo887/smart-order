@@ -50,8 +50,8 @@ export class PrismaCustomerCardRepository
     return CustomerCard.create({
       id: record.id,
       cardNumber: record.cardNumber,
-      waiterId: record.waiterId,
-      restaurantId: record.restaurantId,
+      collaboratorId: record.collaboratorId,
+      establishmentId: record.establishmentId,
       openedAt: record.openedAt,
       firstOrderAt: record.firstOrderAt,
       closedAt: record.closedAt,
@@ -65,8 +65,8 @@ export class PrismaCustomerCardRepository
     return {
       id: card.id,
       cardNumber: card.cardNumber,
-      waiterId: card.waiterId,
-      restaurantId: card.restaurantId,
+      collaboratorId: card.collaboratorId,
+      establishmentId: card.establishmentId,
       openedAt: card.openedAt,
       firstOrderAt: card.firstOrderAt,
       closedAt: card.closedAt,

@@ -6,7 +6,7 @@ import { OrderItem } from './order-item.entity';
 
 export type OrderProps = {
   customerCardId: string;
-  restaurantId: string;
+  establishmentId: string;
   items: OrderItem[];
   id?: string;
   createdAt?: Date;
@@ -33,8 +33,8 @@ export class Order extends EntityBase {
     return this.props.customerCardId;
   }
 
-  public get restaurantId(): string {
-    return this.props.restaurantId;
+  public get establishmentId(): string {
+    return this.props.establishmentId;
   }
 
   public get items(): OrderItem[] {

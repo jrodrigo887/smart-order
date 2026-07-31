@@ -6,7 +6,7 @@ import { EnvConfigModule } from './shared/infrastructure/env-config/env-config.m
 import { UsersModule } from './users/infrastructure/users.module';
 import { CustomerCardsModule } from './core/customer-cards/infrastructure/customer-cards.module';
 import { OrdersModule } from './core/orders/infrastructure/orders.module';
-import { WaitersModule } from './core/waiters/infrastructure/waiters.module';
+import { CollaboratorsModule } from './core/collaborators/infrastructure/collaborators.module';
 import { CompaniesModule } from './core/companies/infrastructure/companies.module';
 import { EstablishmentsModule } from './core/establishments/infrastructure/establishments.module';
 
@@ -17,7 +17,7 @@ import { EstablishmentsModule } from './core/establishments/infrastructure/estab
     UsersModule,
     CustomerCardsModule,
     OrdersModule,
-    WaitersModule,
+    CollaboratorsModule,
     CompaniesModule,
     EstablishmentsModule,
   ],

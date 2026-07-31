@@ -7,13 +7,13 @@ import { Order } from '../order.entity';
 
 describe('OrderEntity', () => {
   let customerCardId: string;
-  let restaurantId: string;
+  let establishmentId: string;
   let item1: OrderItem;
   let item2: OrderItem;
 
   beforeEach(() => {
     customerCardId = faker.string.uuid();
-    restaurantId = faker.string.uuid();
+    establishmentId = faker.string.uuid();
     item1 = OrderItem.create({
       orderId: faker.string.uuid(),
       description: 'X-Burguer',
@@ -31,26 +31,26 @@ describe('OrderEntity', () => {
   it('should create a valid Order with its items', () => {
     const order = Order.create({
       customerCardId,
-      restaurantId,
+      establishmentId,
       items: [item1, item2],
     });
 
     expect(order).toBeInstanceOf(Order);
     expect(order.customerCardId).toEqual(customerCardId);
-    expect(order.restaurantId).toEqual(restaurantId);
+    expect(order.establishmentId).toEqual(establishmentId);
     expect(order.items).toHaveLength(2);
   });
 
   it('should not create an Order without items', () => {
     expect(() =>
-      Order.create({ customerCardId, restaurantId, items: [] }),
+      Order.create({ customerCardId, establishmentId, items: [] }),
     ).toThrow(OrderValidationError);
   });
 
   it('should find an item by id', () => {
     const order = Order.create({
       customerCardId,
-      restaurantId,
+      establishmentId,
       items: [item1],
     });
     expect(order.findItem(item1.id)).toBe(item1);
@@ -59,7 +59,7 @@ describe('OrderEntity', () => {
   it('should throw NotFoundError when the item does not belong to the Order', () => {
     const order = Order.create({
       customerCardId,
-      restaurantId,
+      establishmentId,
       items: [item1],
     });
     expect(() => order.findItem(faker.string.uuid())).toThrow(NotFoundError);
@@ -68,7 +68,7 @@ describe('OrderEntity', () => {
   it('should not be ready when items are not yet prepared', () => {
     const order = Order.create({
       customerCardId,
-      restaurantId,
+      establishmentId,
       items: [item1, item2],
     });
     expect(order.isReady()).toBe(false);
@@ -77,7 +77,7 @@ describe('OrderEntity', () => {
   it('should be ready once every item is prepared', () => {
     const order = Order.create({
       customerCardId,
-      restaurantId,
+      establishmentId,
       items: [item1, item2],
     });
     item1.startPreparing();
@@ -91,7 +91,7 @@ describe('OrderEntity', () => {
   it('should not be ready while at least one active item is still pending', () => {
     const order = Order.create({
       customerCardId,
-      restaurantId,
+      establishmentId,
       items: [item1, item2],
     });
     item1.startPreparing();
@@ -103,7 +103,7 @@ describe('OrderEntity', () => {
   it('should stay ready when a prepared item is later delivered', () => {
     const order = Order.create({
       customerCardId,
-      restaurantId,
+      establishmentId,
       items: [item1],
     });
     item1.startPreparing();
@@ -116,7 +116,7 @@ describe('OrderEntity', () => {
   it('should ignore cancelled items when computing readiness', () => {
     const order = Order.create({
       customerCardId,
-      restaurantId,
+      establishmentId,
       items: [item1, item2],
     });
     item1.startPreparing();
@@ -129,7 +129,7 @@ describe('OrderEntity', () => {
   it('should not be ready when every item has been cancelled', () => {
     const order = Order.create({
       customerCardId,
-      restaurantId,
+      establishmentId,
       items: [item1, item2],
     });
     item1.cancel();

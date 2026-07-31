@@ -21,8 +21,8 @@ export class OrdersController {
   }
 
   @Get()
-  listPending(@Query('restaurantId') restaurantId: string) {
-    return this.ordersService.listPendingByRestaurant(restaurantId);
+  listPending(@Query('establishmentId') establishmentId: string) {
+    return this.ordersService.listPendingByEstablishment(establishmentId);
   }
 
   @Patch(':orderId/items/:itemId/start-preparing')

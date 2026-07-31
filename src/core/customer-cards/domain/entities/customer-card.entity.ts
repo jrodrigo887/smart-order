@@ -8,8 +8,8 @@ import {
 
 export type CustomerCardProps = {
   cardNumber: number;
-  waiterId: string; // uuid
-  restaurantId: string; // uuid
+  collaboratorId: string; // uuid
+  establishmentId: string; // uuid
   openedAt: Date;
   status: CustomerCardStatusType;
   closedAt: Date | null;
@@ -38,18 +38,18 @@ export class CustomerCard extends EntityBase {
     return this.props.cardNumber;
   }
 
-  public get waiterId(): string {
-    return this.props.waiterId;
+  public get collaboratorId(): string {
+    return this.props.collaboratorId;
   }
 
-  public get restaurantId(): string {
-    return this.props.restaurantId;
+  public get establishmentId(): string {
+    return this.props.establishmentId;
   }
 
-  public updateWaiterId(id: string): void {
-    this.assertMutable('update waiterId of');
+  public updateCollaboratorId(id: string): void {
+    this.assertMutable('update collaboratorId of');
     const validId = UuidUnique.create(id);
-    this.props.waiterId = validId.getValue();
+    this.props.collaboratorId = validId.getValue();
     this.props.updatedAt = new Date();
   }
 
