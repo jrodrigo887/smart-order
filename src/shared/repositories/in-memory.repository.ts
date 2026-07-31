@@ -37,6 +37,11 @@ export abstract class InMemoryRepository<T extends EntityBase>
       this.items.splice(index, 1);
     }
   }
+
+  protected getAll(): T[] {
+    return this.items;
+  }
+
   private _getById(id: string): T {
     const item = this.items.find((item) => item.id === id);
     if (!item) {

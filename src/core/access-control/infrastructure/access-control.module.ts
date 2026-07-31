@@ -2,8 +2,10 @@ import { Module } from '@nestjs/common';
 import { EstablishmentsModule } from '@/core/establishments/infrastructure/establishments.module';
 import { COMPANY_ROLE_REPOSITORY } from '../domain/repositories/company-role.repository.contract';
 import { ESTABLISHMENT_ACCESS_REPOSITORY } from '../domain/repositories/establishment-access.repository.contract';
+import { ESTABLISHMENT_LOOKUP } from '../domain/ports/establishment-lookup';
 import { PrismaCompanyRoleRepository } from './repositories/prisma-company-role.repository';
 import { PrismaEstablishmentAccessRepository } from './repositories/prisma-establishment-access.repository';
+import { EstablishmentsServiceGateway } from './gateways/establishments-service.gateway';
 import { AccessControlService } from './access-control.service';
 
 @Module({
@@ -15,6 +17,7 @@ import { AccessControlService } from './access-control.service';
       provide: ESTABLISHMENT_ACCESS_REPOSITORY,
       useClass: PrismaEstablishmentAccessRepository,
     },
+    { provide: ESTABLISHMENT_LOOKUP, useClass: EstablishmentsServiceGateway },
   ],
   exports: [AccessControlService],
 })

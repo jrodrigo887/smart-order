@@ -4,10 +4,12 @@ import { CustomerCardsService } from '@/core/customer-cards/infrastructure/custo
 import { InMemoryCustomerCardRepository } from '@/core/customer-cards/infrastructure/repositories/in-memory-customer-card.repository';
 import { CustomerCardStatus } from '@/core/customer-cards/domain/enums/customer-card-status.enum';
 import { CustomerCardStatusError } from '@/core/customer-cards/domain/errors/customer-card-status.error';
+import { CollaboratorsService } from '@/core/collaborators/infrastructure/collaborators.service';
+import { InMemoryCollaboratorRepository } from '@/core/collaborators/infrastructure/repositories/in-memory-collaborator.repository';
+import { CollaboratorRole } from '@/core/collaborators/domain/enums/collaborator-role.enum';
 import { NotFoundError } from '@/shared/errors/not-found.error';
 import { UnauthorizedCancellationError } from '../../domain/errors/unauthorized-cancellation.error';
 import { OrderReadyEvent } from '../../domain/events/order-ready.event';
-import { CancellationRole } from '../../domain/entities/order-item.entity';
 import { InMemoryOrderRepository } from '../repositories/in-memory-order.repository';
 import { LaunchOrderInput, OrdersService } from '../orders.service';
 
@@ -15,6 +17,7 @@ describe('OrdersService', () => {
   let sut: OrdersService;
   let orderRepository: InMemoryOrderRepository;
   let customerCardsService: CustomerCardsService;
+  let collaboratorsService: CollaboratorsService;
   let eventBus: { publish: jest.Mock };
   let customerCardId: string;
   let establishmentId: string;
@@ -25,10 +28,14 @@ describe('OrdersService', () => {
     customerCardsService = new CustomerCardsService(
       new InMemoryCustomerCardRepository(),
     );
+    collaboratorsService = new CollaboratorsService(
+      new InMemoryCollaboratorRepository(),
+    );
     eventBus = { publish: jest.fn() };
     sut = new OrdersService(
       orderRepository,
       customerCardsService,
+      collaboratorsService,
       eventBus as unknown as EventBus,
     );
 
@@ -129,7 +136,7 @@ describe('OrdersService', () => {
     expect(updated.findItem(itemId).status).toEqual('CANCELED');
   });
 
-  it('should not cancel an item in preparation without an Owner actor', async () => {
+  it('should not cancel an item in preparation without a collaboratorId', async () => {
     const order = await sut.launch(launchInput);
     const itemId = order.items[0].id;
     await sut.startPreparingItem(order.id, itemId);
@@ -137,19 +144,59 @@ describe('OrdersService', () => {
     await expect(sut.cancelItem(order.id, itemId)).rejects.toThrow(
       UnauthorizedCancellationError,
     );
-    await expect(
-      sut.cancelItem(order.id, itemId, { role: CancellationRole.WAITER }),
-    ).rejects.toThrow(UnauthorizedCancellationError);
   });
 
-  it('should cancel an item in preparation when authorized by an Owner actor', async () => {
+  it('should not cancel an item in preparation for a non-Owner Collaborator', async () => {
+    const order = await sut.launch(launchInput);
+    const itemId = order.items[0].id;
+    await sut.startPreparingItem(order.id, itemId);
+    const waiter = await collaboratorsService.register({
+      name: faker.person.fullName(),
+      establishmentId,
+      role: CollaboratorRole.WAITER,
+    });
+
+    await expect(sut.cancelItem(order.id, itemId, waiter.id)).rejects.toThrow(
+      UnauthorizedCancellationError,
+    );
+  });
+
+  it('should not cancel an item in preparation for a Collaborator of a different Establishment', async () => {
+    const order = await sut.launch(launchInput);
+    const itemId = order.items[0].id;
+    await sut.startPreparingItem(order.id, itemId);
+    const outsider = await collaboratorsService.register({
+      name: faker.person.fullName(),
+      establishmentId: faker.string.uuid(),
+      role: CollaboratorRole.OWNER,
+    });
+
+    await expect(sut.cancelItem(order.id, itemId, outsider.id)).rejects.toThrow(
+      UnauthorizedCancellationError,
+    );
+  });
+
+  it('should not cancel an item in preparation for an unresolvable collaboratorId', async () => {
     const order = await sut.launch(launchInput);
     const itemId = order.items[0].id;
     await sut.startPreparingItem(order.id, itemId);
 
-    const updated = await sut.cancelItem(order.id, itemId, {
-      role: CancellationRole.OWNER,
+    await expect(
+      sut.cancelItem(order.id, itemId, faker.string.uuid()),
+    ).rejects.toThrow(UnauthorizedCancellationError);
+  });
+
+  it('should cancel an item in preparation when authorized by an Owner Collaborator', async () => {
+    const order = await sut.launch(launchInput);
+    const itemId = order.items[0].id;
+    await sut.startPreparingItem(order.id, itemId);
+    const owner = await collaboratorsService.register({
+      name: faker.person.fullName(),
+      establishmentId,
+      role: CollaboratorRole.OWNER,
     });
+
+    const updated = await sut.cancelItem(order.id, itemId, owner.id);
 
     expect(updated.findItem(itemId).status).toEqual('CANCELED');
   });

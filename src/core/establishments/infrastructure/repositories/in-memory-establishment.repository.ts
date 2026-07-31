@@ -6,8 +6,11 @@ export class InMemoryEstablishmentRepository
   extends InMemoryRepository<Establishment>
   implements EstablishmentRepositoryContract
 {
-  async findByCompanyId(companyId: string): Promise<Establishment[]> {
-    const all = await this.findAll();
-    return all.filter((establishment) => establishment.companyId === companyId);
+  findByCompanyId(companyId: string): Promise<Establishment[]> {
+    return Promise.resolve(
+      this.getAll().filter(
+        (establishment) => establishment.companyId === companyId,
+      ),
+    );
   }
 }

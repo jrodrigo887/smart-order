@@ -1,98 +1,203 @@
-<p align="center">
-  <a href="http://nestjs.com/" target="blank"><img src="https://nestjs.com/img/logo-small.svg" width="120" alt="Nest Logo" /></a>
-</p>
+# Smart-Order
 
-[circleci-image]: https://img.shields.io/circleci/build/github/nestjs/nest/master?token=abc123def456
-[circleci-url]: https://circleci.com/gh/nestjs/nest
+**🇧🇷 Português** | [🇺🇸 English](README.en.md)
 
-  <p align="center">A progressive <a href="http://nodejs.org" target="_blank">Node.js</a> framework for building efficient and scalable server-side applications.</p>
-    <p align="center">
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/v/@nestjs/core.svg" alt="NPM Version" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/l/@nestjs/core.svg" alt="Package License" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/dm/@nestjs/common.svg" alt="NPM Downloads" /></a>
-<a href="https://circleci.com/gh/nestjs/nest" target="_blank"><img src="https://img.shields.io/circleci/build/github/nestjs/nest/master" alt="CircleCI" /></a>
-<a href="https://discord.gg/G7Qnnhy" target="_blank"><img src="https://img.shields.io/badge/discord-online-brightgreen.svg" alt="Discord"/></a>
-<a href="https://opencollective.com/nest#backer" target="_blank"><img src="https://opencollective.com/nest/backers/badge.svg" alt="Backers on Open Collective" /></a>
-<a href="https://opencollective.com/nest#sponsor" target="_blank"><img src="https://opencollective.com/nest/sponsors/badge.svg" alt="Sponsors on Open Collective" /></a>
-  <a href="https://paypal.me/kamilmysliwiec" target="_blank"><img src="https://img.shields.io/badge/Donate-PayPal-ff3f59.svg" alt="Donate us"/></a>
-    <a href="https://opencollective.com/nest#sponsor"  target="_blank"><img src="https://img.shields.io/badge/Support%20us-Open%20Collective-41B883.svg" alt="Support us"></a>
-  <a href="https://twitter.com/nestframework" target="_blank"><img src="https://img.shields.io/twitter/follow/nestframework.svg?style=social&label=Follow" alt="Follow us on Twitter"></a>
-</p>
-  <!--[![Backers on Open Collective](https://opencollective.com/nest/backers/badge.svg)](https://opencollective.com/nest#backer)
-  [![Sponsors on Open Collective](https://opencollective.com/nest/sponsors/badge.svg)](https://opencollective.com/nest#sponsor)-->
+Sistema de gestão de comandas e pedidos para restaurantes, bares, hotéis e outros estabelecimentos: abertura/fechamento de comandas, envio de pedidos para a cozinha e alertas aos garçons quando os pedidos ficam prontos.
 
-## Description
+## Sumário
 
-[Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
+- [Domínio](#domínio)
+- [Arquitetura](#arquitetura)
+- [Stack técnica](#stack-técnica)
+- [Estrutura de pastas](#estrutura-de-pastas)
+- [Pré-requisitos](#pré-requisitos)
+- [Configuração do ambiente](#configuração-do-ambiente)
+- [Rodando o projeto](#rodando-o-projeto)
+- [Banco de dados (Prisma)](#banco-de-dados-prisma)
+- [Testes](#testes)
+- [Explorando a API](#explorando-a-api)
+- [Scripts disponíveis](#scripts-disponíveis)
+- [Convenções de contribuição](#convenções-de-contribuição)
+- [Documentação adicional](#documentação-adicional)
 
-## Project setup
+## Domínio
 
-```bash
-$ npm install
+O glossário completo do domínio (com termos a evitar e o porquê de cada decisão) vive em [`CONTEXT.md`](./CONTEXT.md). Resumo dos conceitos principais:
+
+| Termo | O que é |
+| --- | --- |
+| **Company** | Pessoa jurídica dona de um ou mais Establishments. |
+| **Establishment** | Um restaurante/bar/hotel — a instância (tenant) do produto e o limite de isolamento de dados. |
+| **Collaborator** | Pessoa que trabalha em um Establishment com um papel operacional (`Waiter`, `KitchenStaff`, `Cashier`, `Owner`...). Desacoplado do `User` de login. |
+| **User** | Identidade de autenticação (login), independente do papel operacional. |
+| **CompanyRole** / **EstablishmentAccess** | Acesso administrativo de um `User` a uma Company/Establishment (RBAC administrativo, ADR-0010). |
+| **Cartão** | Objeto físico numerado (QR code) entregue ao cliente, reaproveitado entre atendimentos. |
+| **Comanda** (`CustomerCard` no código) | Registro de um atendimento, aberto ao escanear um Cartão. Ciclo de vida: `ABERTA → EM_USO → FECHADA/CANCELADA`. |
+| **Order** | Um pedido lançado numa Comanda, agrupando um ou mais `OrderItem`. Fica `PRONTO` (derivado) quando todos os itens são preparados, disparando alerta ao(s) Waiter(s). |
+| **OrderItem** | Item de um Order com ciclo próprio na cozinha: `criado → em preparo → preparado → entregue`. |
+
+As decisões arquiteturais relevantes (uma por tema) estão em [`docs/adr/`](./docs/adr/) — vale ler antes de mexer numa área nova.
+
+## Arquitetura
+
+Cada módulo de domínio em `src/core/<módulo>` segue o mesmo layout:
+
+```
+<módulo>/
+├── domain/            # Entidades, VOs, erros, eventos, portas (interfaces) e contratos de repositório
+├── dto/                # DTOs de entrada/saída (validação com class-validator)
+└── infrastructure/     # Controller, service, módulo Nest, repositórios Prisma/in-memory, listeners de evento
 ```
 
-## Compile and run the project
+Princípios (ver ADRs para o racional completo):
 
-```bash
-# development
-$ npm run start
+- **Módulos se integram por portas e eventos, não por import direto entre domínios** (ADR-0005) — ex.: `OrdersModule` notifica via `CollaboratorAlertNotifier` (porta), não conhece `CollaboratorsModule` diretamente.
+- **Entidades desacopladas de identidade de login** — `Collaborator`/`Waiter` não dependem de `User` (ADR-0003, ADR-0009), permitindo que a mesma pessoa tenha vínculos diferentes em contextos diferentes.
+- `src/shared/` concentra o que é transversal a todos os módulos: `entities/` (`EntityBase`), `errors/`, `infrastructure/` (filtro de exceções de domínio, `EnvConfigModule`, Prisma), `repositories/` (contrato genérico + implementação in-memory para testes), `validators/` e `vo/` (value objects, ex. UUID único).
+- `packages/payments-sdk` é um workspace npm separado: núcleo hexagonal de pagamentos, agnóstico de provedor e de framework (usa um adapter dedicado para se plugar no NestJS).
 
-# watch mode
-$ npm run start:dev
+## Stack técnica
 
-# production mode
-$ npm run start:prod
+- **Runtime/linguagem**: Node.js 22, TypeScript (strict null checks, `target ES2023`)
+- **Framework**: NestJS 11 (`@nestjs/cqrs` disponível para os módulos que precisarem)
+- **Banco de dados**: PostgreSQL 16, via Prisma 6 (schema modular em `prisma/schema/*.prisma`)
+- **Validação**: `class-validator` / `class-transformer`
+- **Documentação de API**: Swagger (`@nestjs/swagger`), servido em `/api`
+- **Testes**: Jest (unitários e e2e) + Supertest
+- **Lint/format**: ESLint (flat config) + Prettier
+- **Containers**: Docker / Docker Compose (Postgres local e de teste)
+
+## Estrutura de pastas
+
+```
+smart-order/
+├── src/
+│   ├── core/                  # Módulos de domínio (orders, companies, establishments,
+│   │                           #   collaborators, customer-cards, access-control)
+│   ├── users/                  # Módulo de autenticação/identidade (User)
+│   ├── shared/                 # Código transversal (entities, errors, repositories, vo, validators)
+│   ├── config/prisma/          # PrismaService/PrismaModule
+│   ├── app.module.ts
+│   └── main.ts                 # Bootstrap Nest + Swagger + filtro global de exceções
+├── prisma/schema/               # Schema Prisma modular (um arquivo por entidade) + migrations
+├── packages/payments-sdk/       # Workspace npm separado — núcleo hexagonal de pagamentos
+├── test/                        # Testes e2e (Supertest) + config do Jest e2e
+├── http/                        # Coleções `.http` para testar a API manualmente (REST Client)
+├── docs/adr/                    # Architecture Decision Records
+├── docs/agents/                 # Como agentes de IA devem operar neste repo (issues, domínio, labels)
+├── openspec/                    # Fluxo spec-driven para propor/aplicar mudanças (ver skills `opsx:*`)
+└── CONTEXT.md                   # Glossário de domínio (ubiquitous language)
 ```
 
-## Run tests
+## Pré-requisitos
+
+- Node.js 22+
+- npm
+- Docker e Docker Compose (para subir o Postgres local sem instalar nada na máquina)
+
+## Configuração do ambiente
+
+O projeto usa três arquivos de variáveis de ambiente, cada um com um papel diferente:
+
+| Arquivo | Quando é usado |
+| --- | --- |
+| `.env` | Lido automaticamente pelo **Docker Compose** para interpolar `${PORT}`, `${POSTGRES_*}` etc. no `docker-compose.yml`. |
+| `.env.development` | Carregado pela aplicação quando `NODE_ENV=development` (script `start:dev`). |
+| `.env.test` | Carregado pela aplicação quando `NODE_ENV=test` (scripts `test-unit*`, testes e2e). Aponta para o banco `db-test` (porta `5433`), isolado do banco de desenvolvimento. |
+
+`EnvConfigModule` (`src/shared/infrastructure/env-config`) sempre carrega o arquivo `.env.${NODE_ENV}` — por isso cada ambiente precisa do seu próprio arquivo.
+
+Para começar:
 
 ```bash
-# unit tests
-$ npm run test
-
-# e2e tests
-$ npm run test:e2e
-
-# test coverage
-$ npm run test:cov
+cp .env.example .env
+cp .env.example .env.development
+cp .env.example .env.test   # ajuste a porta/DB para o banco de teste (5433 / db-smart-test)
 ```
 
-## Deployment
+Os valores default em `.env.example` já funcionam com o `docker-compose.yml` deste repo.
 
-When you're ready to deploy your NestJS application to production, there are some key steps you can take to ensure it runs as efficiently as possible. Check out the [deployment documentation](https://docs.nestjs.com/deployment) for more information.
-
-If you are looking for a cloud-based platform to deploy your NestJS application, check out [Mau](https://mau.nestjs.com), our official platform for deploying NestJS applications on AWS. Mau makes deployment straightforward and fast, requiring just a few simple steps:
+## Rodando o projeto
 
 ```bash
-$ npm install -g mau
-$ mau deploy
+# 1. Instalar dependências
+npm install
+
+# 2. Subir o Postgres (dev + teste) via Docker
+docker-compose up -d db db-test
+
+# 3. Aplicar as migrations
+npx prisma migrate dev
+
+# 4. Rodar em modo watch
+npm run start:dev
 ```
 
-With Mau, you can deploy your application in just a few clicks, allowing you to focus on building features rather than managing infrastructure.
+A API sobe em `http://localhost:3001` (valor default de `PORT` no `.env.development`) e a documentação Swagger fica em `http://localhost:3001/api`.
 
-## Resources
+Alternativa via container único (sobe app + `db`, definido em `docker-compose.yml`):
 
-Check out a few resources that may come in handy when working with NestJS:
+```bash
+npm run up
+```
 
-- Visit the [NestJS Documentation](https://docs.nestjs.com) to learn more about the framework.
-- For questions and support, please visit our [Discord channel](https://discord.gg/G7Qnnhy).
-- To dive deeper and get more hands-on experience, check out our official video [courses](https://courses.nestjs.com/).
-- Deploy your application to AWS with the help of [NestJS Mau](https://mau.nestjs.com) in just a few clicks.
-- Visualize your application graph and interact with the NestJS application in real-time using [NestJS Devtools](https://devtools.nestjs.com).
-- Need help with your project (part-time to full-time)? Check out our official [enterprise support](https://enterprise.nestjs.com).
-- To stay in the loop and get updates, follow us on [X](https://x.com/nestframework) and [LinkedIn](https://linkedin.com/company/nestjs).
-- Looking for a job, or have a job to offer? Check out our official [Jobs board](https://jobs.nestjs.com).
+## Banco de dados (Prisma)
 
-## Support
+O schema é modular — um arquivo `.prisma` por entidade em `prisma/schema/` (`company.prisma`, `establishment.prisma`, `collaborator.prisma`, `order.prisma`, `customer-card.prisma`, `user.prisma`, `company-role.prisma`, `establishment-access.prisma`), unidos por `prisma/schema/schema.prisma`.
 
-Nest is an MIT-licensed open source project. It can grow thanks to the sponsors and support by the amazing backers. If you'd like to join them, please [read more here](https://docs.nestjs.com/support).
+```bash
+npx prisma migrate dev      # cria/aplica uma nova migration em dev
+npx prisma generate         # regenera o Prisma Client após mudar o schema
+npx prisma studio           # inspeciona o banco visualmente
+```
 
-## Stay in touch
+## Testes
 
-- Author - [Kamil Myśliwiec](https://twitter.com/kammysliwiec)
-- Website - [https://nestjs.com](https://nestjs.com/)
-- Twitter - [@nestframework](https://twitter.com/nestframework)
+```bash
+npm run test-unit           # testes unitários (*.spec.ts colocados junto ao código, em __tests__/)
+npm run test-unit:watch     # unitários em modo watch
+npm run test-unit:cov       # unitários com cobertura
+npm run test:e2e            # testes e2e (Supertest), em test/*.e2e-spec.ts, sobe a aplicação inteira
+```
 
-## License
+Os testes unitários rodam com `NODE_ENV=test`, carregando `.env.test` — garanta que `db-test` esteja no ar (`docker-compose up -d db-test`) antes de rodar suites que tocam repositórios Prisma.
 
-Nest is [MIT licensed](https://github.com/nestjs/nest/blob/master/LICENSE).
+## Explorando a API
+
+- **Swagger**: `http://localhost:3001/api` com o servidor rodando.
+- **Coleções `.http`**: a pasta [`http/`](./http) tem requisições prontas (formato REST Client / IntelliJ HTTP Client) para os principais fluxos — comandas, pedidos, cancelamento, garçons, usuários.
+
+## Scripts disponíveis
+
+| Script | O que faz |
+| --- | --- |
+| `npm run build` | Compila com o Nest CLI (`dist/`) |
+| `npm run start` | Sobe a aplicação (sem watch) |
+| `npm run start:dev` | Sobe em modo watch, com `NODE_ENV=development` |
+| `npm run start:debug` | Modo watch + debugger do Node |
+| `npm run start:swc` | Sobe usando o compilador SWC (mais rápido) |
+| `npm run start:prod` | Roda o build já compilado (`dist/main`) |
+| `npm run lint` | ESLint com `--fix` sobre `src/`, `apps/`, `libs/`, `test/` |
+| `npm run format` | Prettier `--write` sobre `src/` e `test/` |
+| `npm run test-unit` | Testes unitários |
+| `npm run test-unit:watch` | Testes unitários em watch |
+| `npm run test-unit:cov` | Testes unitários com cobertura |
+| `npm run test:e2e` | Testes e2e |
+| `npm run test:debug` | Testes com o debugger do Node anexado |
+| `npm run up` | `docker-compose down && docker-compose up` |
+
+## Convenções de contribuição
+
+- **Código em inglês** (identificadores, classes, mensagens internas); **PT-BR só na interface/rótulos** exibidos ao usuário final — ver exemplos termo a termo em `CONTEXT.md`.
+- **Commits**: [Conventional Commits](https://www.conventionalcommits.org/) com escopo do módulo e descrição em português, ex. `feat(orders): adiciona política de cancelamento`.
+- **Decisões de arquitetura**: uma mudança estrutural relevante ganha um ADR novo em `docs/adr/`.
+- **Novo vocabulário de domínio**: atualize `CONTEXT.md` — não crie sinônimos para termos que o glossário já cobre (veja a seção "Avoid" de cada termo).
+- **Issues**: gerenciadas via `gh` CLI neste repositório (`jrodrigo887/smart-order`); ver `docs/agents/issue-tracker.md`.
+- **Mudanças maiores**: este repo usa um fluxo spec-driven opcional (`openspec/`, skills `opsx:*`) para propor, aplicar e arquivar mudanças antes de codar.
+
+## Documentação adicional
+
+- [`CONTEXT.md`](./CONTEXT.md) — glossário de domínio (ubiquitous language)
+- [`docs/adr/`](./docs/adr/) — Architecture Decision Records
+- [`docs/agents/`](./docs/agents/) — como agentes de IA devem operar neste repo (issues, domínio, labels de triagem)
+- [`openspec/`](./openspec/) — fluxo spec-driven para propor/aplicar/arquivar mudanças

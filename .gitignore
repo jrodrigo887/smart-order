@@ -70,5 +70,6 @@ http
 openspec
 .codex
 .claude
+.agents
 CLAUDE.md
 CONTEXT.md

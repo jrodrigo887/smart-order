@@ -2,13 +2,13 @@ import { Injectable } from '@nestjs/common';
 import { CustomerCard as CustomerCardRecord } from '@prisma/client';
 import { PrismaService } from '@/config/prisma/prisma.service';
 import { NotFoundError } from '@/shared/errors/not-found.error';
-import { RepositoryContract } from '@/shared/repositories/contracts/repository.contract';
+import { CustomerCardRepositoryContract } from '../../domain/repositories/customer-card.repository.contract';
 import { CustomerCard } from '../../domain/entities/customer-card.entity';
 import { CustomerCardStatusType } from '../../domain/enums/customer-card-status.enum';
 
 @Injectable()
 export class PrismaCustomerCardRepository
-  implements RepositoryContract<CustomerCard>
+  implements CustomerCardRepositoryContract
 {
   constructor(private readonly prisma: PrismaService) {}
 
@@ -24,6 +24,15 @@ export class PrismaCustomerCardRepository
 
   async findAll(): Promise<CustomerCard[]> {
     const records = await this.prisma.customerCard.findMany();
+    return records.map((record) => this.toDomain(record));
+  }
+
+  async findByEstablishmentId(
+    establishmentId: string,
+  ): Promise<CustomerCard[]> {
+    const records = await this.prisma.customerCard.findMany({
+      where: { establishmentId },
+    });
     return records.map((record) => this.toDomain(record));
   }
 

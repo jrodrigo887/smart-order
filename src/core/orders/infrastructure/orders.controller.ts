@@ -55,6 +55,6 @@ export class OrdersController {
     @Param('itemId') itemId: string,
     @Body() dto: CancelOrderItemDto,
   ) {
-    return this.ordersService.cancelItem(orderId, itemId, dto.actor);
+    return this.ordersService.cancelItem(orderId, itemId, dto.collaboratorId);
   }
 }

@@ -1,9 +1,11 @@
 import { Inject, Injectable } from '@nestjs/common';
 import { EventBus } from '@nestjs/cqrs';
 import { v4 as uuidv4 } from 'uuid';
-import { CustomerCardsService } from '@/core/customer-cards/infrastructure/customer-cards.service';
 import { CustomerCardStatus } from '@/core/customer-cards/domain/enums/customer-card-status.enum';
 import { CustomerCardStatusError } from '@/core/customer-cards/domain/errors/customer-card-status.error';
+import { CollaboratorsService } from '@/core/collaborators/infrastructure/collaborators.service';
+import { Collaborator } from '@/core/collaborators/domain/entities/collaborator.entity';
+import { NotFoundError } from '@/shared/errors/not-found.error';
 import { Order } from '../domain/entities/order.entity';
 import {
   CancellationActor,
@@ -11,10 +13,15 @@ import {
 } from '../domain/entities/order-item.entity';
 import { OrderItemStatus } from '../domain/enums/order-item-status.enum';
 import { OrderReadyEvent } from '../domain/events/order-ready.event';
+import { UnauthorizedCancellationError } from '../domain/errors/unauthorized-cancellation.error';
 import {
   ORDER_REPOSITORY,
   OrderRepositoryContract,
 } from '../domain/repositories/order.repository.contract';
+import {
+  CUSTOMER_CARD_GATEWAY,
+  CustomerCardGateway,
+} from '../domain/ports/customer-card-gateway';
 
 export type LaunchOrderInput = {
   customerCardId: string;
@@ -26,12 +33,14 @@ export class OrdersService {
   constructor(
     @Inject(ORDER_REPOSITORY)
     private readonly repository: OrderRepositoryContract,
-    private readonly customerCardsService: CustomerCardsService,
+    @Inject(CUSTOMER_CARD_GATEWAY)
+    private readonly customerCardGateway: CustomerCardGateway,
+    private readonly collaboratorsService: CollaboratorsService,
     private readonly eventBus: EventBus,
   ) {}
 
   async launch(input: LaunchOrderInput): Promise<Order> {
-    const customerCard = await this.customerCardsService.findById(
+    const customerCard = await this.customerCardGateway.findById(
       input.customerCardId,
     );
     if (
@@ -43,7 +52,7 @@ export class OrdersService {
       );
     }
     if (customerCard.isOpen()) {
-      await this.customerCardsService.markInUse(customerCard.id);
+      await this.customerCardGateway.markInUse(customerCard.id);
     }
 
     const orderId = uuidv4();
@@ -90,17 +99,41 @@ export class OrdersService {
   async cancelItem(
     orderId: string,
     itemId: string,
-    actor?: CancellationActor,
+    collaboratorId?: string,
   ): Promise<Order> {
     const order = await this.repository.findById(orderId);
+    const actor = await this.resolveCancellationActor(order, collaboratorId);
     order.findItem(itemId).cancel(actor);
     return this.repository.update(orderId, order);
   }
 
+  private async resolveCancellationActor(
+    order: Order,
+    collaboratorId?: string,
+  ): Promise<CancellationActor | undefined> {
+    if (!collaboratorId) {
+      return undefined;
+    }
+    let collaborator: Collaborator;
+    try {
+      collaborator = await this.collaboratorsService.findById(collaboratorId);
+    } catch (error) {
+      if (error instanceof NotFoundError) {
+        throw new UnauthorizedCancellationError(
+          `Collaborator ${collaboratorId} not found`,
+        );
+      }
+      throw error;
+    }
+    if (collaborator.establishmentId !== order.establishmentId) {
+      throw new UnauthorizedCancellationError(
+        `Collaborator ${collaboratorId} does not belong to the Order's Establishment`,
+      );
+    }
+    return { role: collaborator.role };
+  }
+
   async listPendingByEstablishment(establishmentId: string): Promise<Order[]> {
-    const all = await this.repository.findAll();
-    return all.filter(
-      (order) => order.establishmentId === establishmentId && !order.isReady(),
-    );
+    return this.repository.findPendingByEstablishmentId(establishmentId);
   }
 }

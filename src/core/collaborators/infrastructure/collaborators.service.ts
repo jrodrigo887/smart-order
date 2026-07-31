@@ -39,9 +39,6 @@ export class CollaboratorsService {
   }
 
   async listByEstablishment(establishmentId: string): Promise<Collaborator[]> {
-    const all = await this.repository.findAll();
-    return all.filter(
-      (collaborator) => collaborator.establishmentId === establishmentId,
-    );
+    return this.repository.findByEstablishmentId(establishmentId);
   }
 }

@@ -1,12 +1,9 @@
 import { faker } from '@faker-js/faker';
+import { CollaboratorRole } from '@/core/collaborators/domain/enums/collaborator-role.enum';
 import { OrderItemStatus } from '../../enums/order-item-status.enum';
 import { OrderItemStatusError } from '../../errors/order-item-status.error';
 import { UnauthorizedCancellationError } from '../../errors/unauthorized-cancellation.error';
-import {
-  CancellationRole,
-  OrderItem,
-  OrderItemProps,
-} from '../order-item.entity';
+import { OrderItem, OrderItemProps } from '../order-item.entity';
 
 describe('OrderItemEntity', () => {
   let orderItem: OrderItem;
@@ -63,7 +60,7 @@ describe('OrderItemEntity', () => {
 
   it('should cancel an item already in preparation when authorized by an Owner actor', () => {
     orderItem.startPreparing();
-    orderItem.cancel({ role: CancellationRole.OWNER });
+    orderItem.cancel({ role: CollaboratorRole.OWNER });
     expect(orderItem.status).toEqual(OrderItemStatus.CANCELED);
   });
 
@@ -87,7 +84,7 @@ describe('OrderItemEntity', () => {
     'should not cancel a %s item for a non-Owner actor',
     (status) => {
       orderItem = OrderItem.create({ ...props, status });
-      expect(() => orderItem.cancel({ role: CancellationRole.WAITER })).toThrow(
+      expect(() => orderItem.cancel({ role: CollaboratorRole.WAITER })).toThrow(
         UnauthorizedCancellationError,
       );
     },
@@ -97,7 +94,7 @@ describe('OrderItemEntity', () => {
     'should cancel a %s item for an Owner actor',
     (status) => {
       orderItem = OrderItem.create({ ...props, status });
-      orderItem.cancel({ role: CancellationRole.OWNER });
+      orderItem.cancel({ role: CollaboratorRole.OWNER });
       expect(orderItem.status).toEqual(OrderItemStatus.CANCELED);
     },
   );
@@ -106,7 +103,7 @@ describe('OrderItemEntity', () => {
     'should throw OrderItemStatusError for a %s item even for an Owner actor',
     (status) => {
       orderItem = OrderItem.create({ ...props, status });
-      expect(() => orderItem.cancel({ role: CancellationRole.OWNER })).toThrow(
+      expect(() => orderItem.cancel({ role: CollaboratorRole.OWNER })).toThrow(
         OrderItemStatusError,
       );
     },

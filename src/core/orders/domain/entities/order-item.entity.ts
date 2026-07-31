@@ -1,4 +1,8 @@
 import { EntityBase } from '@/shared/entities/entity-base';
+import {
+  CollaboratorRole,
+  CollaboratorRoleType,
+} from '@/core/collaborators/domain/enums/collaborator-role.enum';
 import { OrderItemStatusError } from '../errors/order-item-status.error';
 import { UnauthorizedCancellationError } from '../errors/unauthorized-cancellation.error';
 import {
@@ -6,15 +10,7 @@ import {
   OrderItemStatusType,
 } from '../enums/order-item-status.enum';
 
-export const CancellationRole = {
-  OWNER: 'OWNER',
-  WAITER: 'WAITER',
-} as const;
-
-export type CancellationRoleType =
-  (typeof CancellationRole)[keyof typeof CancellationRole];
-
-export type CancellationActor = { role: CancellationRoleType };
+export type CancellationActor = { role: CollaboratorRoleType };
 
 export type OrderItemProps = {
   orderId: string;
@@ -99,7 +95,7 @@ export class OrderItem extends EntityBase {
     if (
       (this.props.status === OrderItemStatus.PREPARING ||
         this.props.status === OrderItemStatus.PREPARED) &&
-      actor?.role !== CancellationRole.OWNER
+      actor?.role !== CollaboratorRole.OWNER
     ) {
       throw new UnauthorizedCancellationError(
         'Cancelling an OrderItem that already started preparing requires Owner authorization',

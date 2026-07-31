@@ -54,7 +54,6 @@ export class CustomerCardsService {
   }
 
   async listByEstablishment(establishmentId: string): Promise<CustomerCard[]> {
-    const all = await this.repository.findAll();
-    return all.filter((card) => card.establishmentId === establishmentId);
+    return this.repository.findByEstablishmentId(establishmentId);
   }
 }

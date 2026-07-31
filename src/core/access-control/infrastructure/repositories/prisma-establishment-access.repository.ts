@@ -26,6 +26,16 @@ export class PrismaEstablishmentAccessRepository
     return records.map((record) => this.toDomain(record));
   }
 
+  async findByUserAndEstablishment(
+    userId: string,
+    establishmentId: string,
+  ): Promise<EstablishmentAccess | null> {
+    const record = await this.prisma.establishmentAccess.findUnique({
+      where: { userId_establishmentId: { userId, establishmentId } },
+    });
+    return record ? this.toDomain(record) : null;
+  }
+
   async create(data: EstablishmentAccess): Promise<EstablishmentAccess> {
     const record = await this.prisma.establishmentAccess.create({
       data: this.toPersistence(data),

@@ -27,6 +27,15 @@ export class PrismaCollaboratorRepository
     return records.map((record) => this.toDomain(record));
   }
 
+  async findByEstablishmentId(
+    establishmentId: string,
+  ): Promise<Collaborator[]> {
+    const records = await this.prisma.collaborator.findMany({
+      where: { establishmentId },
+    });
+    return records.map((record) => this.toDomain(record));
+  }
+
   async create(data: Collaborator): Promise<Collaborator> {
     const record = await this.prisma.collaborator.create({
       data: this.toPersistence(data),
