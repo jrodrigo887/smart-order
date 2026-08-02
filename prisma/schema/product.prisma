@@ -1,0 +1,22 @@
+model Product {
+  id              String        @id @default(uuid())
+  establishmentId String
+  categoryId      String
+  name            String
+  description     String?
+  sku             String?
+  basePrice       Decimal       @db.Decimal(10, 2)
+  tags            String[]
+  status          ProductStatus @default(ACTIVE)
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+
+  establishment Establishment @relation(fields: [establishmentId], references: [id])
+  category      Category      @relation(fields: [categoryId], references: [id])
+  menuItems     MenuItem[]
+}
+
+enum ProductStatus {
+  ACTIVE
+  DISCONTINUED
+}

@@ -1,0 +1,21 @@
+model MenuItem {
+  id           String         @id @default(uuid())
+  menuId       String
+  productId    String
+  price        Decimal        @db.Decimal(10, 2)
+  status       MenuItemStatus @default(AVAILABLE)
+  displayOrder Int            @default(0)
+  featured     Boolean        @default(false)
+  createdAt    DateTime       @default(now())
+  updatedAt    DateTime       @updatedAt
+
+  menu    Menu    @relation(fields: [menuId], references: [id])
+  product Product @relation(fields: [productId], references: [id])
+
+  @@unique([menuId, productId])
+}
+
+enum MenuItemStatus {
+  AVAILABLE
+  UNAVAILABLE
+}

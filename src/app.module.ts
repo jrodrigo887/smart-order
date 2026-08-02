@@ -10,6 +10,7 @@ import { CollaboratorsModule } from './core/collaborators/infrastructure/collabo
 import { CompaniesModule } from './core/companies/infrastructure/companies.module';
 import { EstablishmentsModule } from './core/establishments/infrastructure/establishments.module';
 import { AccessControlModule } from './core/access-control/infrastructure/access-control.module';
+import { MenuModule } from './core/menu/infrastructure/menu.module';
 
 @Module({
   imports: [
@@ -22,6 +23,7 @@ import { AccessControlModule } from './core/access-control/infrastructure/access
     CompaniesModule,
     EstablishmentsModule,
     AccessControlModule,
+    MenuModule,
   ],
   controllers: [AppController],
   providers: [AppService],

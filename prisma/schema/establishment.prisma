@@ -12,6 +12,9 @@ model Establishment {
   collaborators       Collaborator[]
   customerCards       CustomerCard[]
   establishmentAccess EstablishmentAccess[]
+  categories          Category[]
+  products            Product[]
+  menus               Menu[]
 }
 
 enum EstablishmentUnitType {
